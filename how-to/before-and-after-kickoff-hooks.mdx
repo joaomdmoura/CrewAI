@@ -1,0 +1,59 @@
+---
+title: Before and After Kickoff Hooks
+description: Learn how to use before and after kickoff hooks in CrewAI
+---
+
+CrewAI provides hooks that allow you to execute code before and after a crew's kickoff. These hooks are useful for preprocessing inputs or post-processing results.
+
+## Before Kickoff Hook
+
+The before kickoff hook is executed before the crew starts its tasks. It receives the input dictionary and can modify it before passing it to the crew. You can use this hook to set up your environment, load necessary data, or preprocess your inputs. This is useful in scenarios where the input data might need enrichment or validation before being processed by the crew.
+
+Here's an example of defining a before kickoff function in your `crew.py`:
+
+```python
+from crewai import CrewBase, before_kickoff
+
+@CrewBase
+class MyCrew:
+    @before_kickoff
+    def prepare_data(self, inputs):
+        # Preprocess or modify inputs
+        inputs['processed'] = True
+        return inputs
+
+#...
+```
+
+In this example, the prepare_data function modifies the inputs by adding a new key-value pair indicating that the inputs have been processed.
+
+## After Kickoff Hook
+
+The after kickoff hook is executed after the crew has completed its tasks. It receives the result object, which contains the outputs of the crew's execution. This hook is ideal for post-processing results, such as logging, data transformation, or further analysis.
+
+Here's how you can define an after kickoff function in your `crew.py`:
+
+```python
+from crewai import CrewBase, after_kickoff
+
+@CrewBase
+class MyCrew:
+    @after_kickoff
+    def log_results(self, result):
+        # Log or modify the results
+        print("Crew execution completed with result:", result)
+        return result
+
+# ...
+```
+
+
+In the `log_results` function, the results of the crew execution are simply printed out. You can extend this to perform more complex operations such as sending notifications or integrating with other services.
+
+## Utilizing Both Hooks
+
+Both hooks can be used together to provide a comprehensive setup and teardown process for your crew's execution. They are particularly useful in maintaining clean code architecture by separating concerns and enhancing the modularity of your CrewAI implementations.
+
+## Conclusion
+
+Before and after kickoff hooks in CrewAI offer powerful ways to interact with the lifecycle of a crew's execution. By understanding and utilizing these hooks, you can greatly enhance the robustness and flexibility of your AI agents.

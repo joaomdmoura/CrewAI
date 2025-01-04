@@ -1,0 +1,72 @@
+---
+title: Agent Monitoring with Langtrace
+description: How to monitor cost, latency, and performance of CrewAI Agents using Langtrace, an external observability tool.
+icon: chart-line
+---
+
+# Langtrace Overview
+
+Langtrace is an open-source, external tool that helps you set up observability and evaluations for Large Language Models (LLMs), LLM frameworks, and Vector Databases. 
+While not built directly into CrewAI, Langtrace can be used alongside CrewAI to gain deep visibility into the cost, latency, and performance of your CrewAI Agents. 
+This integration allows you to log hyperparameters, monitor performance regressions, and establish a process for continuous improvement of your Agents.
+
+![Overview of a select series of agent session runs](/images/langtrace1.png)
+![Overview of agent traces](/images/langtrace2.png)
+![Overview of llm traces in details](/images/langtrace3.png)
+
+## Setup Instructions
+
+<Steps>
+   <Step title="Sign up for Langtrace">
+      Sign up by visiting [https://langtrace.ai/signup](https://langtrace.ai/signup).
+   </Step>
+   <Step title="Create a project">
+      Set the project type to `CrewAI` and generate an API key.
+   </Step>
+   <Step title="Install Langtrace in your CrewAI project">
+      Use the following command:
+
+    ```bash
+    pip install langtrace-python-sdk
+    ```
+   </Step>
+   <Step title="Import Langtrace">
+      Import and initialize Langtrace at the beginning of your script, before any CrewAI imports:
+
+    ```python
+    from langtrace_python_sdk import langtrace
+    langtrace.init(api_key='<LANGTRACE_API_KEY>')
+
+    # Now import CrewAI modules
+    from crewai import Agent, Task, Crew
+    ```
+   </Step>
+</Steps> 
+
+### Features and Their Application to CrewAI
+
+1. **LLM Token and Cost Tracking**
+
+   - Monitor the token usage and associated costs for each CrewAI agent interaction.
+
+2. **Trace Graph for Execution Steps**
+
+   - Visualize the execution flow of your CrewAI tasks, including latency and logs.
+   - Useful for identifying bottlenecks in your agent workflows.
+
+3. **Dataset Curation with Manual Annotation**
+
+   - Create datasets from your CrewAI task outputs for future training or evaluation.
+
+4. **Prompt Versioning and Management**
+
+   - Keep track of different versions of prompts used in your CrewAI agents.
+   - Useful for A/B testing and optimizing agent performance.
+
+5. **Prompt Playground with Model Comparisons**
+
+   - Test and compare different prompts and models for your CrewAI agents before deployment.
+
+6. **Testing and Evaluations**
+
+   - Set up automated tests for your CrewAI agents and tasks.

@@ -1,0 +1,138 @@
+---
+title: Using Multimodal Agents
+description: Learn how to enable and use multimodal capabilities in your agents for processing images and other non-text content within the CrewAI framework.
+icon: image
+---
+
+# Using Multimodal Agents
+
+CrewAI supports multimodal agents that can process both text and non-text content like images. This guide will show you how to enable and use multimodal capabilities in your agents.
+
+## Enabling Multimodal Capabilities
+
+To create a multimodal agent, simply set the `multimodal` parameter to `True` when initializing your agent:
+
+```python
+from crewai import Agent
+
+agent = Agent(
+    role="Image Analyst",
+    goal="Analyze and extract insights from images",
+    backstory="An expert in visual content interpretation with years of experience in image analysis",
+    multimodal=True  # This enables multimodal capabilities
+)
+```
+
+When you set `multimodal=True`, the agent is automatically configured with the necessary tools for handling non-text content, including the `AddImageTool`.
+
+## Working with Images
+
+The multimodal agent comes pre-configured with the `AddImageTool`, which allows it to process images. You don't need to manually add this tool - it's automatically included when you enable multimodal capabilities.
+
+Here's a complete example showing how to use a multimodal agent to analyze an image:
+
+```python
+from crewai import Agent, Task, Crew
+
+# Create a multimodal agent
+image_analyst = Agent(
+    role="Product Analyst",
+    goal="Analyze product images and provide detailed descriptions",
+    backstory="Expert in visual product analysis with deep knowledge of design and features",
+    multimodal=True
+)
+
+# Create a task for image analysis
+task = Task(
+    description="Analyze the product image at https://example.com/product.jpg and provide a detailed description",
+    agent=image_analyst
+)
+
+# Create and run the crew
+crew = Crew(
+    agents=[image_analyst],
+    tasks=[task]
+)
+
+result = crew.kickoff()
+```
+
+### Advanced Usage with Context
+
+You can provide additional context or specific questions about the image when creating tasks for multimodal agents. The task description can include specific aspects you want the agent to focus on:
+
+```python
+from crewai import Agent, Task, Crew
+
+# Create a multimodal agent for detailed analysis
+expert_analyst = Agent(
+    role="Visual Quality Inspector",
+    goal="Perform detailed quality analysis of product images",
+    backstory="Senior quality control expert with expertise in visual inspection",
+    multimodal=True  # AddImageTool is automatically included
+)
+
+# Create a task with specific analysis requirements
+inspection_task = Task(
+    description="""
+    Analyze the product image at https://example.com/product.jpg with focus on:
+    1. Quality of materials
+    2. Manufacturing defects
+    3. Compliance with standards
+    Provide a detailed report highlighting any issues found.
+    """,
+    agent=expert_analyst
+)
+
+# Create and run the crew
+crew = Crew(
+    agents=[expert_analyst],
+    tasks=[inspection_task]
+)
+
+result = crew.kickoff()
+```
+
+### Tool Details
+
+When working with multimodal agents, the `AddImageTool` is automatically configured with the following schema:
+
+```python
+class AddImageToolSchema:
+    image_url: str  # Required: The URL or path of the image to process
+    action: Optional[str] = None  # Optional: Additional context or specific questions about the image
+```
+
+The multimodal agent will automatically handle the image processing through its built-in tools, allowing it to:
+- Access images via URLs or local file paths
+- Process image content with optional context or specific questions
+- Provide analysis and insights based on the visual information and task requirements
+
+## Best Practices
+
+When working with multimodal agents, keep these best practices in mind:
+
+1. **Image Access**
+   - Ensure your images are accessible via URLs that the agent can reach
+   - For local images, consider hosting them temporarily or using absolute file paths
+   - Verify that image URLs are valid and accessible before running tasks
+
+2. **Task Description**
+   - Be specific about what aspects of the image you want the agent to analyze
+   - Include clear questions or requirements in the task description
+   - Consider using the optional `action` parameter for focused analysis
+
+3. **Resource Management**
+   - Image processing may require more computational resources than text-only tasks
+   - Some language models may require base64 encoding for image data
+   - Consider batch processing for multiple images to optimize performance
+
+4. **Environment Setup**
+   - Verify that your environment has the necessary dependencies for image processing
+   - Ensure your language model supports multimodal capabilities
+   - Test with small images first to validate your setup
+
+5. **Error Handling**
+   - Implement proper error handling for image loading failures
+   - Have fallback strategies for when image processing fails
+   - Monitor and log image processing operations for debugging

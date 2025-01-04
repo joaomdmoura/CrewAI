@@ -1,0 +1,730 @@
+---
+title: 'LLMs'
+description: 'A comprehensive guide to configuring and using Large Language Models (LLMs) in your CrewAI projects'
+icon: 'microchip-ai'
+---
+
+<Note>
+  CrewAI integrates with multiple LLM providers through LiteLLM, giving you the flexibility to choose the right model for your specific use case. This guide will help you understand how to configure and use different LLM providers in your CrewAI projects.
+</Note>
+
+## What are LLMs?
+
+Large Language Models (LLMs) are the core intelligence behind CrewAI agents. They enable agents to understand context, make decisions, and generate human-like responses. Here's what you need to know:
+
+<CardGroup cols={2}>
+  <Card title="LLM Basics" icon="brain">
+    Large Language Models are AI systems trained on vast amounts of text data. They power the intelligence of your CrewAI agents, enabling them to understand and generate human-like text.
+  </Card>
+  <Card title="Context Window" icon="window">
+    The context window determines how much text an LLM can process at once. Larger windows (e.g., 128K tokens) allow for more context but may be more expensive and slower.
+  </Card>
+  <Card title="Temperature" icon="temperature-three-quarters">
+    Temperature (0.0 to 1.0) controls response randomness. Lower values (e.g., 0.2) produce more focused, deterministic outputs, while higher values (e.g., 0.8) increase creativity and variability.
+  </Card>
+  <Card title="Provider Selection" icon="server">
+    Each LLM provider (e.g., OpenAI, Anthropic, Google) offers different models with varying capabilities, pricing, and features. Choose based on your needs for accuracy, speed, and cost.
+  </Card>
+</CardGroup>
+
+## Available Models and Their Capabilities
+
+Here's a detailed breakdown of supported models and their capabilities, you can compare performance at [lmarena.ai](https://lmarena.ai/?leaderboard) and [artificialanalysis.ai](https://artificialanalysis.ai/):
+
+<Tabs>
+  <Tab title="OpenAI">
+    | Model | Context Window | Best For |
+    |-------|---------------|-----------|
+    | GPT-4 | 8,192 tokens | High-accuracy tasks, complex reasoning |
+    | GPT-4 Turbo | 128,000 tokens | Long-form content, document analysis |
+    | GPT-4o & GPT-4o-mini | 128,000 tokens | Cost-effective large context processing |
+
+    <Note>
+      1 token ≈ 4 characters in English. For example, 8,192 tokens ≈ 32,768 characters or about 6,000 words.
+    </Note>
+  </Tab>
+  <Tab title="Nvidia NIM">
+    | Model | Context Window | Best For |
+    |-------|---------------|-----------|
+    | nvidia/mistral-nemo-minitron-8b-8k-instruct | 8,192 tokens | State-of-the-art small language model delivering superior accuracy for chatbot, virtual assistants, and content generation. |
+    | nvidia/nemotron-4-mini-hindi-4b-instruct| 4,096 tokens | A bilingual Hindi-English SLM for on-device inference, tailored specifically for Hindi Language. |
+    | "nvidia/llama-3.1-nemotron-70b-instruct | 128k tokens | Llama-3.1-Nemotron-70B-Instruct is a large language model customized by NVIDIA in order to improve the helpfulness of LLM generated responses. |
+    | nvidia/llama3-chatqa-1.5-8b | 128k tokens | Advanced LLM to generate high-quality, context-aware responses for chatbots and search engines. |
+    | nvidia/llama3-chatqa-1.5-70b | 128k tokens | Advanced LLM to generate high-quality, context-aware responses for chatbots and search engines. |
+    | nvidia/vila | 128k tokens | Multi-modal vision-language model that understands text/img/video and creates informative responses |
+    | nvidia/neva-22| 4,096 tokens | Multi-modal vision-language model that understands text/images and generates informative responses |
+    | nvidia/nemotron-mini-4b-instruct | 8,192 tokens | General-purpose tasks |
+    | nvidia/usdcode-llama3-70b-instruct | 128k tokens | State-of-the-art LLM that answers OpenUSD knowledge queries and generates USD-Python code. |
+    | nvidia/nemotron-4-340b-instruct | 4,096 tokens | Creates diverse synthetic data that mimics the characteristics of real-world data. |
+    | meta/codellama-70b | 100k tokens | LLM capable of generating code from natural language and vice versa. |
+    | meta/llama2-70b | 4,096 tokens | Cutting-edge large language AI model capable of generating text and code in response to prompts. |
+    | meta/llama3-8b-instruct | 8,192 tokens | Advanced state-of-the-art LLM with language understanding, superior reasoning, and text generation. |
+    | meta/llama3-70b-instruct | 8,192 tokens | Powers complex conversations with superior contextual understanding, reasoning and text generation. |
+    | meta/llama-3.1-8b-instruct | 128k tokens | Advanced state-of-the-art model with language understanding, superior reasoning, and text generation. |
+    | meta/llama-3.1-70b-instruct | 128k tokens | Powers complex conversations with superior contextual understanding, reasoning and text generation. |
+    | meta/llama-3.1-405b-instruct | 128k tokens | Advanced LLM for synthetic data generation, distillation, and inference for chatbots, coding, and domain-specific tasks. |
+    | meta/llama-3.2-1b-instruct | 128k tokens | Advanced state-of-the-art small language model with language understanding, superior reasoning, and text generation. |
+    | meta/llama-3.2-3b-instruct | 128k tokens | Advanced state-of-the-art small language model with language understanding, superior reasoning, and text generation. |
+    | meta/llama-3.2-11b-vision-instruct | 128k tokens | Advanced state-of-the-art small language model with language understanding, superior reasoning, and text generation. |
+    | meta/llama-3.2-90b-vision-instruct | 128k tokens | Advanced state-of-the-art small language model with language understanding, superior reasoning, and text generation. |
+    | meta/llama-3.1-70b-instruct | 128k tokens | Powers complex conversations with superior contextual understanding, reasoning and text generation. |
+    | google/gemma-7b | 8,192 tokens | Cutting-edge text generation model text understanding, transformation, and code generation. |
+    | google/gemma-2b | 8,192 tokens | Cutting-edge text generation model text understanding, transformation, and code generation. |
+    | google/codegemma-7b | 8,192 tokens | Cutting-edge model built on Google's Gemma-7B specialized for code generation and code completion. |
+    | google/codegemma-1.1-7b | 8,192 tokens | Advanced programming model for code generation, completion, reasoning, and instruction following. |
+    | google/recurrentgemma-2b | 8,192 tokens | Novel recurrent architecture based language model for faster inference when generating long sequences. |
+    | google/gemma-2-9b-it | 8,192 tokens | Cutting-edge text generation model text understanding, transformation, and code generation. |
+    | google/gemma-2-27b-it | 8,192 tokens | Cutting-edge text generation model text understanding, transformation, and code generation. |
+    | google/gemma-2-2b-it | 8,192 tokens | Cutting-edge text generation model text understanding, transformation, and code generation. |
+    | google/deplot | 512 tokens | One-shot visual language understanding model that translates images of plots into tables. |
+    | google/paligemma | 8,192 tokens | Vision language model adept at comprehending text and visual inputs to produce informative responses. |
+    | mistralai/mistral-7b-instruct-v0.2 | 32k tokens | This LLM follows instructions, completes requests, and generates creative text. |
+    | mistralai/mixtral-8x7b-instruct-v0.1 | 8,192 tokens | An MOE LLM that follows instructions, completes requests, and generates creative text. |
+    | mistralai/mistral-large | 4,096 tokens | Creates diverse synthetic data that mimics the characteristics of real-world data. |
+    | mistralai/mixtral-8x22b-instruct-v0.1 | 8,192 tokens | Creates diverse synthetic data that mimics the characteristics of real-world data. |
+    | mistralai/mistral-7b-instruct-v0.3 | 32k tokens | This LLM follows instructions, completes requests, and generates creative text. |
+    | nv-mistralai/mistral-nemo-12b-instruct | 128k tokens | Most advanced language model for reasoning, code, multilingual tasks; runs on a single GPU. |
+    | mistralai/mamba-codestral-7b-v0.1 | 256k tokens | Model for writing and interacting with code across a wide range of programming languages and tasks. |
+    | microsoft/phi-3-mini-128k-instruct | 128K tokens | Lightweight, state-of-the-art open LLM with strong math and logical reasoning skills. |
+    | microsoft/phi-3-mini-4k-instruct | 4,096 tokens | Lightweight, state-of-the-art open LLM with strong math and logical reasoning skills. |
+    | microsoft/phi-3-small-8k-instruct | 8,192 tokens | Lightweight, state-of-the-art open LLM with strong math and logical reasoning skills. |
+    | microsoft/phi-3-small-128k-instruct | 128K tokens | Lightweight, state-of-the-art open LLM with strong math and logical reasoning skills. |
+    | microsoft/phi-3-medium-4k-instruct | 4,096 tokens | Lightweight, state-of-the-art open LLM with strong math and logical reasoning skills. |
+    | microsoft/phi-3-medium-128k-instruct | 128K tokens | Lightweight, state-of-the-art open LLM with strong math and logical reasoning skills. |
+    | microsoft/phi-3.5-mini-instruct | 128K tokens | Lightweight multilingual LLM powering AI applications in latency bound, memory/compute constrained environments |
+    | microsoft/phi-3.5-moe-instruct | 128K tokens | Advanced LLM based on Mixture of Experts architecure to deliver compute efficient content generation |
+    | microsoft/kosmos-2 | 1,024 tokens | Groundbreaking multimodal model designed to understand and reason about visual elements in images. |
+    | microsoft/phi-3-vision-128k-instruct | 128k tokens | Cutting-edge open multimodal model exceling in high-quality reasoning from images. |
+    | microsoft/phi-3.5-vision-instruct | 128k tokens | Cutting-edge open multimodal model exceling in high-quality reasoning from images. |
+    | databricks/dbrx-instruct | 12k tokens | A general-purpose LLM with state-of-the-art performance in language understanding, coding, and RAG. |
+    | snowflake/arctic | 1,024 tokens | Delivers high efficiency inference for enterprise applications focused on SQL generation and coding. |
+    | aisingapore/sea-lion-7b-instruct | 4,096 tokens | LLM to represent and serve the linguistic and cultural diversity of Southeast Asia |
+    | ibm/granite-8b-code-instruct | 4,096 tokens | Software programming LLM for code generation, completion, explanation, and multi-turn conversion. |
+    | ibm/granite-34b-code-instruct | 8,192 tokens | Software programming LLM for code generation, completion, explanation, and multi-turn conversion. |
+    | ibm/granite-3.0-8b-instruct | 4,096 tokens | Advanced Small Language Model supporting RAG, summarization, classification, code, and agentic AI |
+    | ibm/granite-3.0-3b-a800m-instruct | 4,096 tokens | Highly efficient Mixture of Experts model for RAG, summarization, entity extraction, and classification |
+    | mediatek/breeze-7b-instruct | 4,096 tokens | Creates diverse synthetic data that mimics the characteristics of real-world data. |
+    | upstage/solar-10.7b-instruct | 4,096 tokens | Excels in NLP tasks, particularly in instruction-following, reasoning, and mathematics. |
+    | writer/palmyra-med-70b-32k | 32k tokens | Leading LLM for accurate, contextually relevant responses in the medical domain. |
+    | writer/palmyra-med-70b | 32k tokens | Leading LLM for accurate, contextually relevant responses in the medical domain. |
+    | writer/palmyra-fin-70b-32k | 32k tokens | Specialized LLM for financial analysis, reporting, and data processing |
+    | 01-ai/yi-large | 32k tokens | Powerful model trained on English and Chinese for diverse tasks including chatbot and creative writing. |
+    | deepseek-ai/deepseek-coder-6.7b-instruct | 2k tokens | Powerful coding model offering advanced capabilities in code generation, completion, and infilling |
+    | rakuten/rakutenai-7b-instruct | 1,024 tokens | Advanced state-of-the-art LLM with language understanding, superior reasoning, and text generation. |
+    | rakuten/rakutenai-7b-chat | 1,024 tokens | Advanced state-of-the-art LLM with language understanding, superior reasoning, and text generation. |
+    | baichuan-inc/baichuan2-13b-chat | 4,096 tokens | Support Chinese and English chat, coding, math, instruction following, solving quizzes |
+
+    <Note>
+      NVIDIA's NIM support for models is expanding continuously! For the most up-to-date list of available models, please visit build.nvidia.com.
+    </Note>
+  </Tab>
+  <Tab title="Gemini">
+    | Model | Context Window | Best For |
+    |-------|---------------|-----------|
+    | gemini-2.0-flash-exp | 1M tokens | Higher quality at faster speed, multimodal model, good for most tasks |
+    | gemini-1.5-flash | 1M tokens | Balanced multimodal model, good for most tasks |
+    | gemini-1.5-flash-8B | 1M tokens | Fastest, most cost-efficient, good for high-frequency tasks |
+    | gemini-1.5-pro | 2M tokens | Best performing, wide variety of reasoning tasks including logical reasoning, coding, and creative collaboration |
+
+    <Tip>
+      Google's Gemini models are all multimodal, supporting audio, images, video and text, supporting context caching, json schema, function calling, etc.
+
+      These models are available via API_KEY from 
+      [The Gemini API](https://ai.google.dev/gemini-api/docs) and also from 
+      [Google Cloud Vertex](https://cloud.google.com/vertex-ai/generative-ai/docs/migrate/migrate-google-ai) as part of the
+      [Model Garden](https://cloud.google.com/vertex-ai/generative-ai/docs/model-garden/explore-models).
+    </Tip>
+  </Tab>
+  <Tab title="Groq">
+    | Model | Context Window | Best For |
+    |-------|---------------|-----------|
+    | Llama 3.1 70B/8B | 131,072 tokens | High-performance, large context tasks |
+    | Llama 3.2 Series | 8,192 tokens | General-purpose tasks |
+    | Mixtral 8x7B | 32,768 tokens | Balanced performance and context |
+
+    <Tip>
+      Groq is known for its fast inference speeds, making it suitable for real-time applications.
+    </Tip>
+  </Tab>
+  <Tab title="Others">
+    | Provider | Context Window | Key Features |
+    |----------|---------------|--------------|
+    | Deepseek Chat | 128,000 tokens | Specialized in technical discussions |
+    | Claude 3 | Up to 200K tokens | Strong reasoning, code understanding |
+    | Gemma Series | 8,192 tokens | Efficient, smaller-scale tasks |
+
+    <Info>
+      Provider selection should consider factors like:
+      - API availability in your region
+      - Pricing structure
+      - Required features (e.g., streaming, function calling)
+      - Performance requirements
+    </Info>
+  </Tab>
+</Tabs>
+
+## Setting Up Your LLM
+
+There are three ways to configure LLMs in CrewAI. Choose the method that best fits your workflow:
+
+<Tabs>
+  <Tab title="1. Environment Variables">
+    The simplest way to get started. Set these variables in your environment:
+
+    ```bash
+    # Required: Your API key for authentication
+    OPENAI_API_KEY=<your-api-key>
+
+    # Optional: Default model selection
+    OPENAI_MODEL_NAME=gpt-4o-mini  # Default if not set
+
+    # Optional: Organization ID (if applicable)
+    OPENAI_ORGANIZATION_ID=<your-org-id>
+    ```
+
+    <Warning>
+      Never commit API keys to version control. Use environment files (.env) or your system's secret management.
+    </Warning>
+  </Tab>
+  <Tab title="2. YAML Configuration">
+    Create a YAML file to define your agent configurations. This method is great for version control and team collaboration:
+
+    ```yaml
+    researcher:
+        # Agent Definition
+        role: Research Specialist
+        goal: Conduct comprehensive research and analysis
+        backstory: A dedicated research professional with years of experience
+        verbose: true
+
+        # Model Selection (uncomment your choice)
+        
+        # OpenAI Models - Known for reliability and performance
+        llm: openai/gpt-4o-mini
+        # llm: openai/gpt-4        # More accurate but expensive
+        # llm: openai/gpt-4-turbo  # Fast with large context
+        # llm: openai/gpt-4o       # Optimized for longer texts
+        # llm: openai/o1-preview   # Latest features
+        # llm: openai/o1-mini      # Cost-effective
+
+        # Azure Models - For enterprise deployments
+        # llm: azure/gpt-4o-mini
+        # llm: azure/gpt-4
+        # llm: azure/gpt-35-turbo
+
+        # Anthropic Models - Strong reasoning capabilities
+        # llm: anthropic/claude-3-opus-20240229-v1:0
+        # llm: anthropic/claude-3-sonnet-20240229-v1:0
+        # llm: anthropic/claude-3-haiku-20240307-v1:0
+        # llm: anthropic/claude-2.1
+        # llm: anthropic/claude-2.0
+
+        # Google Models - Strong reasoning, large cachable context window, multimodal
+        # llm: gemini/gemini-1.5-pro-latest
+        # llm: gemini/gemini-1.5-flash-latest
+        # llm: gemini/gemini-1.5-flash-8b-latest
+
+        # AWS Bedrock Models - Enterprise-grade
+        # llm: bedrock/anthropic.claude-3-sonnet-20240229-v1:0
+        # llm: bedrock/anthropic.claude-v2:1
+        # llm: bedrock/amazon.titan-text-express-v1
+        # llm: bedrock/meta.llama2-70b-chat-v1
+
+        # Mistral Models - Open source alternative
+        # llm: mistral/mistral-large-latest
+        # llm: mistral/mistral-medium-latest
+        # llm: mistral/mistral-small-latest
+
+        # Groq Models - Fast inference
+        # llm: groq/mixtral-8x7b-32768
+        # llm: groq/llama-3.1-70b-versatile
+        # llm: groq/llama-3.2-90b-text-preview
+        # llm: groq/gemma2-9b-it
+        # llm: groq/gemma-7b-it
+
+        # IBM watsonx.ai Models - Enterprise features
+        # llm: watsonx/ibm/granite-13b-chat-v2
+        # llm: watsonx/meta-llama/llama-3-1-70b-instruct
+        # llm: watsonx/bigcode/starcoder2-15b
+
+        # Ollama Models - Local deployment
+        # llm: ollama/llama3:70b
+        # llm: ollama/codellama
+        # llm: ollama/mistral
+        # llm: ollama/mixtral
+        # llm: ollama/phi
+
+        # Fireworks AI Models - Specialized tasks
+        # llm: fireworks_ai/accounts/fireworks/models/llama-v3-70b-instruct
+        # llm: fireworks_ai/accounts/fireworks/models/mixtral-8x7b
+        # llm: fireworks_ai/accounts/fireworks/models/zephyr-7b-beta
+
+        # Perplexity AI Models - Research focused
+        # llm: pplx/llama-3.1-sonar-large-128k-online
+        # llm: pplx/mistral-7b-instruct
+        # llm: pplx/codellama-34b-instruct
+        # llm: pplx/mixtral-8x7b-instruct
+
+        # Hugging Face Models - Community models
+        # llm: huggingface/meta-llama/Meta-Llama-3.1-8B-Instruct
+        # llm: huggingface/mistralai/Mixtral-8x7B-Instruct-v0.1
+        # llm: huggingface/tiiuae/falcon-180B-chat
+        # llm: huggingface/google/gemma-7b-it
+
+        # Nvidia NIM Models - GPU-optimized
+        # llm: nvidia_nim/meta/llama3-70b-instruct
+        # llm: nvidia_nim/mistral/mixtral-8x7b
+        # llm: nvidia_nim/google/gemma-7b
+
+        # SambaNova Models - Enterprise AI
+        # llm: sambanova/Meta-Llama-3.1-8B-Instruct
+        # llm: sambanova/BioMistral-7B
+        # llm: sambanova/Falcon-180B
+    ```
+
+    <Info>
+      The YAML configuration allows you to:
+      - Version control your agent settings
+      - Easily switch between different models
+      - Share configurations across team members
+      - Document model choices and their purposes
+    </Info>
+  </Tab>
+  <Tab title="3. Direct Code">
+    For maximum flexibility, configure LLMs directly in your Python code:
+
+    ```python
+    from crewai import LLM
+
+    # Basic configuration
+    llm = LLM(model="gpt-4")
+
+    # Advanced configuration with detailed parameters
+    llm = LLM(
+        model="gpt-4o-mini",
+        temperature=0.7,        # Higher for more creative outputs
+        timeout=120,           # Seconds to wait for response
+        max_tokens=4000,       # Maximum length of response
+        top_p=0.9,            # Nucleus sampling parameter
+        frequency_penalty=0.1, # Reduce repetition
+        presence_penalty=0.1,  # Encourage topic diversity
+        response_format={"type": "json"},  # For structured outputs
+        seed=42               # For reproducible results
+    )
+    ```
+
+    <Info>
+      Parameter explanations:
+      - `temperature`: Controls randomness (0.0-1.0)
+      - `timeout`: Maximum wait time for response
+      - `max_tokens`: Limits response length
+      - `top_p`: Alternative to temperature for sampling
+      - `frequency_penalty`: Reduces word repetition
+      - `presence_penalty`: Encourages new topics
+      - `response_format`: Specifies output structure
+      - `seed`: Ensures consistent outputs
+    </Info>
+  </Tab>
+</Tabs>
+
+## Advanced Features and Optimization
+
+Learn how to get the most out of your LLM configuration:
+
+<AccordionGroup>
+  <Accordion title="Context Window Management">
+    CrewAI includes smart context management features:
+
+    ```python
+    from crewai import LLM
+
+    # CrewAI automatically handles:
+    # 1. Token counting and tracking
+    # 2. Content summarization when needed
+    # 3. Task splitting for large contexts
+
+    llm = LLM(
+        model="gpt-4",
+        max_tokens=4000,  # Limit response length
+    )
+    ```
+
+    <Info>
+      Best practices for context management:
+      1. Choose models with appropriate context windows
+      2. Pre-process long inputs when possible
+      3. Use chunking for large documents
+      4. Monitor token usage to optimize costs
+    </Info>
+  </Accordion>
+
+  <Accordion title="Performance Optimization">
+    <Steps>
+      <Step title="Token Usage Optimization">
+        Choose the right context window for your task:
+        - Small tasks (up to 4K tokens): Standard models
+        - Medium tasks (between 4K-32K): Enhanced models
+        - Large tasks (over 32K): Large context models
+        
+        ```python
+        # Configure model with appropriate settings
+        llm = LLM(
+            model="openai/gpt-4-turbo-preview",
+            temperature=0.7,    # Adjust based on task
+            max_tokens=4096,    # Set based on output needs
+            timeout=300        # Longer timeout for complex tasks
+        )
+        ```
+        <Tip>
+          - Lower temperature (0.1 to 0.3) for factual responses
+          - Higher temperature (0.7 to 0.9) for creative tasks
+        </Tip>
+      </Step>
+
+      <Step title="Best Practices">
+        1. Monitor token usage
+        2. Implement rate limiting
+        3. Use caching when possible
+        4. Set appropriate max_tokens limits
+      </Step>
+    </Steps>
+
+    <Info>
+      Remember to regularly monitor your token usage and adjust your configuration as needed to optimize costs and performance.
+    </Info>
+  </Accordion>
+</AccordionGroup>
+
+## Provider Configuration Examples
+
+<AccordionGroup>
+  <Accordion title="OpenAI">
+    ```python Code
+    # Required
+    OPENAI_API_KEY=sk-...
+    
+    # Optional
+    OPENAI_API_BASE=<custom-base-url>
+    OPENAI_ORGANIZATION=<your-org-id>
+    ```
+
+    Example usage:
+    ```python Code
+    from crewai import LLM
+
+    llm = LLM(
+        model="gpt-4",
+        temperature=0.8,
+        max_tokens=150,
+        top_p=0.9,
+        frequency_penalty=0.1,
+        presence_penalty=0.1,
+        stop=["END"],
+        seed=42
+    )
+    ```
+  </Accordion>
+
+  <Accordion title="Anthropic">
+    ```python Code
+    ANTHROPIC_API_KEY=sk-ant-...
+    ```
+
+    Example usage:
+    ```python Code
+    llm = LLM(
+        model="anthropic/claude-3-sonnet-20240229-v1:0",
+        temperature=0.7
+    )
+    ```
+  </Accordion>
+
+  <Accordion title="Google">
+    ```python Code
+    # Option 1. Gemini accessed with an API key.
+    # https://ai.google.dev/gemini-api/docs/api-key
+    GEMINI_API_KEY=<your-api-key>
+
+    # Option 2. Vertex AI IAM credentials for Gemini, Anthropic, and anything in the Model Garden.
+    # https://cloud.google.com/vertex-ai/generative-ai/docs/overview
+    ```
+
+    Example usage:
+    ```python Code
+    llm = LLM(
+        model="gemini/gemini-1.5-pro-latest",
+        temperature=0.7
+    )
+    ```
+  </Accordion>
+
+  <Accordion title="Azure">
+    ```python Code
+    # Required
+    AZURE_API_KEY=<your-api-key>
+    AZURE_API_BASE=<your-resource-url>
+    AZURE_API_VERSION=<api-version>
+    
+    # Optional
+    AZURE_AD_TOKEN=<your-azure-ad-token>
+    AZURE_API_TYPE=<your-azure-api-type>
+    ```
+
+    Example usage:
+    ```python Code
+    llm = LLM(
+        model="azure/gpt-4",
+        api_version="2023-05-15"
+    )
+    ```
+  </Accordion>
+
+  <Accordion title="AWS Bedrock">
+    ```python Code
+    AWS_ACCESS_KEY_ID=<your-access-key>
+    AWS_SECRET_ACCESS_KEY=<your-secret-key>
+    AWS_DEFAULT_REGION=<your-region>
+    ```
+
+    Example usage:
+    ```python Code
+    llm = LLM(
+        model="bedrock/anthropic.claude-3-sonnet-20240229-v1:0"
+    )
+    ```
+  </Accordion>
+
+  <Accordion title="Mistral">
+    ```python Code
+    MISTRAL_API_KEY=<your-api-key>
+    ```
+
+    Example usage:
+    ```python Code
+    llm = LLM(
+        model="mistral/mistral-large-latest",
+        temperature=0.7
+    )
+    ```
+  </Accordion>
+
+  <Accordion title="Nvidia NIM">
+    ```python Code
+    NVIDIA_API_KEY=<your-api-key>
+    ```
+
+    Example usage:
+    ```python Code
+    llm = LLM(
+        model="nvidia_nim/meta/llama3-70b-instruct",
+        temperature=0.7
+    )
+    ```
+  </Accordion>
+
+  <Accordion title="Groq">
+    ```python Code
+    GROQ_API_KEY=<your-api-key>
+    ```
+
+    Example usage:
+    ```python Code
+    llm = LLM(
+        model="groq/llama-3.2-90b-text-preview",
+        temperature=0.7
+    )
+    ```
+  </Accordion>
+
+  <Accordion title="IBM watsonx.ai">
+    ```python Code
+    # Required
+    WATSONX_URL=<your-url>
+    WATSONX_APIKEY=<your-apikey>
+    WATSONX_PROJECT_ID=<your-project-id>
+    
+    # Optional
+    WATSONX_TOKEN=<your-token>
+    WATSONX_DEPLOYMENT_SPACE_ID=<your-space-id>
+    ```
+
+    Example usage:
+    ```python Code
+    llm = LLM(
+        model="watsonx/meta-llama/llama-3-1-70b-instruct",
+        base_url="https://api.watsonx.ai/v1"
+    )
+    ```
+  </Accordion>
+
+  <Accordion title="Ollama (Local LLMs)">
+    1. Install Ollama: [ollama.ai](https://ollama.ai/)
+    2. Run a model: `ollama run llama2`
+    3. Configure:
+
+    ```python Code
+    llm = LLM(
+        model="ollama/llama3:70b",
+        base_url="http://localhost:11434"
+    )
+    ```
+  </Accordion>
+
+  <Accordion title="Fireworks AI">
+    ```python Code
+    FIREWORKS_API_KEY=<your-api-key>
+    ```
+
+    Example usage:
+    ```python Code
+    llm = LLM(
+        model="fireworks_ai/accounts/fireworks/models/llama-v3-70b-instruct",
+        temperature=0.7
+    )
+    ```
+  </Accordion>
+
+  <Accordion title="Perplexity AI">
+    ```python Code
+    PERPLEXITY_API_KEY=<your-api-key>
+    ```
+
+    Example usage:
+    ```python Code
+    llm = LLM(
+        model="llama-3.1-sonar-large-128k-online",
+        base_url="https://api.perplexity.ai/"
+    )
+    ```
+  </Accordion>
+
+  <Accordion title="Hugging Face">
+    ```python Code
+    HUGGINGFACE_API_KEY=<your-api-key>
+    ```
+
+    Example usage:
+    ```python Code
+    llm = LLM(
+        model="huggingface/meta-llama/Meta-Llama-3.1-8B-Instruct",
+        base_url="your_api_endpoint"
+    )
+    ```
+  </Accordion>
+
+  <Accordion title="SambaNova">
+    ```python Code
+    SAMBANOVA_API_KEY=<your-api-key>
+    ```
+
+    Example usage:
+    ```python Code
+    llm = LLM(
+        model="sambanova/Meta-Llama-3.1-8B-Instruct",
+        temperature=0.7
+    )
+    ```
+  </Accordion>
+
+  <Accordion title="Cerebras">
+    ```python Code
+    # Required
+    CEREBRAS_API_KEY=<your-api-key>
+    ```
+
+    Example usage:
+    ```python Code
+    llm = LLM(
+        model="cerebras/llama3.1-70b",
+        temperature=0.7,
+        max_tokens=8192
+    )
+    ```
+
+    <Info>
+      Cerebras features:
+      - Fast inference speeds
+      - Competitive pricing
+      - Good balance of speed and quality
+      - Support for long context windows
+    </Info>
+  </Accordion>
+</AccordionGroup>
+
+## Common Issues and Solutions
+
+<Tabs>
+  <Tab title="Authentication">
+    <Warning>
+      Most authentication issues can be resolved by checking API key format and environment variable names.
+    </Warning>
+    
+    ```bash
+    # OpenAI
+    OPENAI_API_KEY=sk-...
+    
+    # Anthropic
+    ANTHROPIC_API_KEY=sk-ant-...
+    ```
+  </Tab>
+  <Tab title="Model Names">
+    <Check>
+      Always include the provider prefix in model names
+    </Check>
+    
+    ```python
+    # Correct
+    llm = LLM(model="openai/gpt-4")
+    
+    # Incorrect
+    llm = LLM(model="gpt-4")
+    ```
+  </Tab>
+  <Tab title="Context Length">
+    <Tip>
+      Use larger context models for extensive tasks
+    </Tip>
+    
+    ```python
+    # Large context model
+    llm = LLM(model="openai/gpt-4o")  # 128K tokens
+    ```
+  </Tab>
+</Tabs>
+
+## Getting Help
+
+If you need assistance, these resources are available:
+
+<CardGroup cols={3}>
+  <Card
+    title="LiteLLM Documentation"
+    href="https://docs.litellm.ai/docs/"
+    icon="book"
+  >
+    Comprehensive documentation for LiteLLM integration and troubleshooting common issues.
+  </Card>
+  <Card
+    title="GitHub Issues"
+    href="https://github.com/joaomdmoura/crewAI/issues"
+    icon="bug"
+  >
+    Report bugs, request features, or browse existing issues for solutions.
+  </Card>
+  <Card
+    title="Community Forum"
+    href="https://community.crewai.com"
+    icon="comment-question"
+  >
+    Connect with other CrewAI users, share experiences, and get help from the community.
+  </Card>
+</CardGroup>
+
+<Note>
+  Best Practices for API Key Security:
+  - Use environment variables or secure vaults
+  - Never commit keys to version control
+  - Rotate keys regularly
+  - Use separate keys for development and production
+  - Monitor key usage for unusual patterns
+</Note>

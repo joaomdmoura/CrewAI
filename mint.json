@@ -1,0 +1,167 @@
+{
+  "name": "CrewAI",
+  "theme": "venus",
+  "logo": {
+    "dark": "crew_only_logo.png",
+    "light": "crew_only_logo.png"
+  },
+  "favicon": "favicon.svg",
+  "colors": {
+    "primary": "#EB6658",
+    "light": "#F3A78B",
+    "dark": "#C94C3C",
+    "anchors": {
+      "from": "#737373",
+      "to": "#EB6658"
+    }
+  },
+  "seo": {
+    "indexHiddenPages": false
+  },
+  "modeToggle": {
+    "default": "dark",
+    "isHidden": false
+  },
+  "feedback": {
+    "suggestEdit": true,
+    "raiseIssue": true,
+    "thumbsRating": true
+  },
+  "topbarCtaButton": {
+    "type": "github",
+    "url": "https://github.com/crewAIInc/crewAI"
+  },
+  "primaryTab": {
+    "name": "Get Started"
+  },
+  "tabs": [
+    {
+      "name": "Examples",
+      "url": "examples"
+    }
+  ],
+  "anchors": [
+    {
+      "name": "Community",
+      "icon": "discourse",
+      "url": "https://community.crewai.com"
+    },
+    {
+      "name": "Changelog",
+      "icon": "timeline",
+      "url": "https://github.com/crewAIInc/crewAI/releases"
+    }
+  ],
+  "navigation": [
+    {
+      "group": "Get Started",
+      "pages": [
+        "introduction",
+        "installation",
+        "quickstart"
+      ]
+    },
+    {
+      "group": "Core Concepts",
+      "pages": [
+        "concepts/agents",
+        "concepts/tasks",
+        "concepts/crews",
+        "concepts/flows",
+        "concepts/knowledge",
+        "concepts/llms",
+        "concepts/processes",
+        "concepts/collaboration",
+        "concepts/training",
+        "concepts/memory",
+        "concepts/planning",
+        "concepts/testing",
+        "concepts/cli",
+        "concepts/tools",
+        "concepts/langchain-tools",
+        "concepts/llamaindex-tools"
+      ]
+    },
+    {
+      "group": "How to Guides",
+      "pages": [
+        "how-to/create-custom-tools",
+        "how-to/sequential-process",
+        "how-to/hierarchical-process",
+        "how-to/custom-manager-agent",
+        "how-to/llm-connections",
+        "how-to/customizing-agents",
+        "how-to/coding-agents",
+        "how-to/force-tool-output-as-result",
+        "how-to/human-input-on-execution",
+        "how-to/kickoff-async",
+        "how-to/kickoff-for-each",
+        "how-to/replay-tasks-from-latest-crew-kickoff",
+        "how-to/conditional-tasks",
+        "how-to/agentops-observability",
+        "how-to/langtrace-observability",
+        "how-to/openlit-observability",
+        "how-to/portkey-observability"
+      ]
+    },
+    {
+      "group": "Examples",
+      "pages": [
+        "examples/example"
+      ]
+    },
+    {
+      "group": "Tools",
+      "pages": [
+        "tools/browserbaseloadtool",
+        "tools/codedocssearchtool",
+        "tools/codeinterpretertool",
+        "tools/composiotool",
+        "tools/csvsearchtool",
+        "tools/dalletool",
+        "tools/directorysearchtool",
+        "tools/directoryreadtool",
+        "tools/docxsearchtool",
+        "tools/exasearchtool",
+        "tools/filereadtool",
+        "tools/filewritetool",
+        "tools/firecrawlcrawlwebsitetool",
+        "tools/firecrawlscrapewebsitetool",
+        "tools/firecrawlsearchtool",
+        "tools/githubsearchtool",
+        "tools/serperdevtool",
+        "tools/jsonsearchtool",
+        "tools/mdxsearchtool",
+        "tools/mysqltool",
+        "tools/nl2sqltool",
+        "tools/pdfsearchtool",
+        "tools/pgsearchtool",
+        "tools/scrapewebsitetool",
+        "tools/seleniumscrapingtool",
+        "tools/spidertool",
+        "tools/txtsearchtool",
+        "tools/visiontool",
+        "tools/websitesearchtool",
+        "tools/xmlsearchtool",
+        "tools/youtubechannelsearchtool",
+        "tools/youtubevideosearchtool"
+      ]
+    },
+    {
+      "group": "Telemetry",
+      "pages": [
+        "telemetry"
+      ]
+    }
+  ],
+  "search": {
+    "prompt": "Search CrewAI docs"
+  },
+  "footerSocials": {
+    "website": "https://crewai.com",
+    "x": "https://x.com/crewAIInc",
+    "github": "https://github.com/crewAIInc/crewAI",
+    "linkedin": "https://www.linkedin.com/company/crewai-inc",
+    "youtube": "https://youtube.com/@crewAIInc"
+  }
+}

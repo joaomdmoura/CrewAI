@@ -1,0 +1,145 @@
+---
+title: Installation
+description: Get started with CrewAI - Install, configure, and build your first AI crew
+icon: wrench
+---
+
+<Note>
+  **Python Version Requirements**
+  
+  CrewAI requires `Python >=3.10 and <3.13`. Here's how to check your version:
+  ```bash
+  python3 --version
+  ```
+  
+  If you need to update Python, visit [python.org/downloads](https://python.org/downloads)
+</Note>
+
+# Installing CrewAI
+
+CrewAI is a flexible and powerful AI framework that enables you to create and manage AI agents, tools, and tasks efficiently. 
+Let's get you set up! 🚀
+
+<Steps>
+    <Step title="Install CrewAI">
+        Install CrewAI with all recommended tools using either method:
+        ```shell Terminal
+        pip install 'crewai[tools]'
+        ```
+        or
+        ```shell Terminal
+        pip install crewai crewai-tools
+        ```
+
+        <Note>
+          Both methods install the core package and additional tools needed for most use cases.
+        </Note>
+    </Step>
+
+    <Step title="Upgrade CrewAI (Existing Installations Only)">
+        If you have an older version of CrewAI installed, you can upgrade it:
+        ```shell Terminal
+        pip install --upgrade crewai crewai-tools
+        ```
+
+        <Warning>
+            If you see a Poetry-related warning, you'll need to migrate to our new dependency manager:
+            ```shell Terminal
+            crewai update
+            ```
+            This will update your project to use [UV](https://github.com/astral-sh/uv), our new faster dependency manager.
+        </Warning>
+
+        <Note>
+            Skip this step if you're doing a fresh installation.
+        </Note>
+    </Step>
+
+    <Step title="Verify Installation">
+        Check your installed versions:
+        ```shell Terminal
+        pip freeze | grep crewai
+        ```
+
+        You should see something like:
+        ```markdown Output
+        crewai==X.X.X
+        crewai-tools==X.X.X
+        ```
+        <Check>Installation successful! You're ready to create your first crew.</Check>
+    </Step>
+</Steps>
+
+# Creating a New Project
+
+<Info>
+  We recommend using the YAML Template scaffolding for a structured approach to defining agents and tasks.
+</Info>
+
+<Steps>
+  <Step title="Generate Project Structure">
+    Run the CrewAI CLI command:
+    ```shell Terminal
+    crewai create crew <project_name>
+    ```
+
+    This creates a new project with the following structure:
+    <Frame>
+    ```
+    my_project/
+    ├── .gitignore
+    ├── pyproject.toml
+    ├── README.md
+    ├── .env
+    └── src/
+        └── my_project/
+            ├── __init__.py
+            ├── main.py
+            ├── crew.py
+            ├── tools/
+            │   ├── custom_tool.py
+            │   └── __init__.py
+            └── config/
+                ├── agents.yaml
+                └── tasks.yaml
+    ```
+    </Frame>
+  </Step>   
+
+  <Step title="Customize Your Project">
+    Your project will contain these essential files:
+
+    | File | Purpose |
+    | --- | --- |
+    | `agents.yaml` | Define your AI agents and their roles |
+    | `tasks.yaml` | Set up agent tasks and workflows |
+    | `.env` | Store API keys and environment variables |
+    | `main.py` | Project entry point and execution flow |
+    | `crew.py` | Crew orchestration and coordination |
+    | `tools/` | Directory for custom agent tools |
+
+    <Tip>
+      Start by editing `agents.yaml` and `tasks.yaml` to define your crew's behavior.
+      Keep sensitive information like API keys in `.env`.
+    </Tip>
+  </Step>
+</Steps>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card
+    title="Build Your First Agent"
+    icon="code"
+    href="/quickstart"
+  >
+    Follow our quickstart guide to create your first CrewAI agent and get hands-on experience.
+  </Card>
+  <Card
+    title="Join the Community"
+    icon="comments"
+    href="https://community.crewai.com"
+  >
+    Connect with other developers, get help, and share your CrewAI experiences.
+  </Card>
+</CardGroup>

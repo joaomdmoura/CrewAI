@@ -1,0 +1,100 @@
+---
+title: Hierarchical Process
+description: A comprehensive guide to understanding and applying the hierarchical process within your CrewAI projects, updated to reflect the latest coding practices and functionalities.
+icon: sitemap
+---
+
+## Introduction
+
+The hierarchical process in CrewAI introduces a structured approach to task management, simulating traditional organizational hierarchies for efficient task delegation and execution. 
+This systematic workflow enhances project outcomes by ensuring tasks are handled with optimal efficiency and accuracy.
+
+<Tip>
+    The hierarchical process is designed to leverage advanced models like GPT-4, optimizing token usage while handling complex tasks with greater efficiency.
+</Tip>
+
+## Hierarchical Process Overview
+
+By default, tasks in CrewAI are managed through a sequential process. However, adopting a hierarchical approach allows for a clear hierarchy in task management, 
+where a 'manager' agent coordinates the workflow, delegates tasks, and validates outcomes for streamlined and effective execution. This manager agent can now be either 
+automatically created by CrewAI or explicitly set by the user.
+
+### Key Features
+
+- **Task Delegation**: A manager agent allocates tasks among crew members based on their roles and capabilities.
+- **Result Validation**: The manager evaluates outcomes to ensure they meet the required standards.
+- **Efficient Workflow**: Emulates corporate structures, providing an organized approach to task management.
+- **System Prompt Handling**: Optionally specify whether the system should use predefined prompts.
+- **Stop Words Control**: Optionally specify whether stop words should be used, supporting various models including the o1 models.
+- **Context Window Respect**: Prioritize important context by enabling respect of the context window, which is now the default behavior.
+- **Delegation Control**: Delegation is now disabled by default to give users explicit control.
+- **Max Requests Per Minute**: Configurable option to set the maximum number of requests per minute.
+- **Max Iterations**: Limit the maximum number of iterations for obtaining a final answer.
+
+
+## Implementing the Hierarchical Process
+
+To utilize the hierarchical process, it's essential to explicitly set the process attribute to `Process.hierarchical`, as the default behavior is `Process.sequential`. 
+Define a crew with a designated manager and establish a clear chain of command.
+
+<Tip>
+    Assign tools at the agent level to facilitate task delegation and execution by the designated agents under the manager's guidance. 
+    Tools can also be specified at the task level for precise control over tool availability during task execution.
+</Tip>
+
+<Tip>
+    Configuring the `manager_llm` parameter is crucial for the hierarchical process. 
+    The system requires a manager LLM to be set up for proper function, ensuring tailored decision-making.
+</Tip>
+
+```python Code
+from langchain_openai import ChatOpenAI
+from crewai import Crew, Process, Agent
+
+# Agents are defined with attributes for backstory, cache, and verbose mode
+researcher = Agent(
+    role='Researcher',
+    goal='Conduct in-depth analysis',
+    backstory='Experienced data analyst with a knack for uncovering hidden trends.',
+    cache=True,
+    verbose=False,
+    # tools=[]  # This can be optionally specified; defaults to an empty list
+    use_system_prompt=True,  # Enable or disable system prompts for this agent
+    max_rpm=30,  # Limit on the number of requests per minute
+    max_iter=5  # Maximum number of iterations for a final answer
+)
+writer = Agent(
+    role='Writer',
+    goal='Create engaging content',
+    backstory='Creative writer passionate about storytelling in technical domains.',
+    cache=True,
+    verbose=False,
+    # tools=[]  # Optionally specify tools; defaults to an empty list
+    use_system_prompt=True,  # Enable or disable system prompts for this agent
+    max_rpm=30,  # Limit on the number of requests per minute
+    max_iter=5  # Maximum number of iterations for a final answer
+)
+
+# Establishing the crew with a hierarchical process and additional configurations
+project_crew = Crew(
+    tasks=[...],  # Tasks to be delegated and executed under the manager's supervision
+    agents=[researcher, writer],
+    manager_llm=ChatOpenAI(temperature=0, model="gpt-4"),  # Mandatory if manager_agent is not set
+    process=Process.hierarchical,  # Specifies the hierarchical management approach
+    respect_context_window=True,  # Enable respect of the context window for tasks
+    memory=True,  # Enable memory usage for enhanced task execution
+    manager_agent=None,  # Optional: explicitly set a specific agent as manager instead of the manager_llm
+    planning=True,  # Enable planning feature for pre-execution strategy
+)
+```
+
+### Workflow in Action
+
+1. **Task Assignment**: The manager assigns tasks strategically, considering each agent's capabilities and available tools.
+2. **Execution and Review**: Agents complete their tasks with the option for asynchronous execution and callback functions for streamlined workflows.
+3. **Sequential Task Progression**: Despite being a hierarchical process, tasks follow a logical order for smooth progression, facilitated by the manager's oversight.
+
+## Conclusion
+
+Adopting the hierarchical process in CrewAI, with the correct configurations and understanding of the system's capabilities, facilitates an organized and efficient approach to project management. 
+Utilize the advanced features and customizations to tailor the workflow to your specific needs, ensuring optimal task execution and project success.
