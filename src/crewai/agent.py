@@ -137,6 +137,18 @@ class Agent(BaseAgent):
 
     @model_validator(mode="after")
     def post_init_setup(self):
+        # Handle case-insensitive LLM parameter
+        if hasattr(self, 'LLM'):
+            import warnings
+            warnings.warn(
+                "Using 'LLM' parameter is deprecated. Use lowercase 'llm' instead.",
+                DeprecationWarning,
+                stacklevel=2
+            )
+            # Transfer LLM value to llm
+            self.llm = getattr(self, 'LLM')
+            delattr(self, 'LLM')
+
         self._set_knowledge()
         self.agent_ops_agent_name = self.role
         unaccepted_attributes = [
@@ -144,6 +156,9 @@ class Agent(BaseAgent):
             "AWS_SECRET_ACCESS_KEY",
             "AWS_REGION_NAME",
         ]
+        
+        # Initialize LLM parameters
+        llm_params: Dict[str, Any] = {}
 
         # Handle different cases for self.llm
         if isinstance(self.llm, str):
@@ -190,7 +205,71 @@ class Agent(BaseAgent):
                                 if key not in ["prompt", "key_name", "default"]:
                                     # Only add default if the key is already set in os.environ
                                     if key in os.environ:
-                                        llm_params[key] = value
+                                        # Convert environment variables to proper types
+                                        try:
+                                            param_value = None
+                                            
+                                            # Integer parameters
+                                            if key in ['timeout', 'max_tokens', 'n', 'max_completion_tokens']:
+                                                try:
+                                                    param_value = int(str(value)) if value else None
+                                                except (ValueError, TypeError):
+                                                    continue
+                                                    
+                                            # Float parameters
+                                            elif key in ['temperature', 'top_p', 'presence_penalty', 'frequency_penalty']:
+                                                try:
+                                                    param_value = float(str(value)) if value else None
+                                                except (ValueError, TypeError):
+                                                    continue
+                                                    
+                                            # Boolean parameters
+                                            elif key == 'logprobs':
+                                                if isinstance(value, bool):
+                                                    param_value = value
+                                                elif isinstance(value, str):
+                                                    param_value = value.lower() == 'true'
+                                                    
+                                            # Dict parameters
+                                            elif key == 'logit_bias' and value:
+                                                try:
+                                                    if isinstance(value, dict):
+                                                        param_value = {int(k): float(v) for k, v in value.items()}
+                                                    elif isinstance(value, str):
+                                                        import json
+                                                        bias_dict = json.loads(value)
+                                                        param_value = {int(k): float(v) for k, v in bias_dict.items()}
+                                                except (ValueError, TypeError, json.JSONDecodeError):
+                                                    continue
+                                                    
+                                            elif key == 'response_format' and value:
+                                                try:
+                                                    if isinstance(value, dict):
+                                                        param_value = value
+                                                    elif isinstance(value, str):
+                                                        import json
+                                                        param_value = json.loads(value)
+                                                except (ValueError, json.JSONDecodeError):
+                                                    continue
+                                                    
+                                            # List parameters
+                                            elif key == 'callbacks':
+                                                if isinstance(value, (list, tuple)):
+                                                    param_value = list(value)
+                                                elif isinstance(value, str):
+                                                    param_value = [cb.strip() for cb in value.split(',') if cb.strip()]
+                                                else:
+                                                    param_value = []
+                                                    
+                                            # String and other parameters
+                                            else:
+                                                param_value = value
+
+                                            if param_value is not None:
+                                                llm_params[key] = param_value
+                                        except Exception:
+                                            # Skip any invalid values
+                                            continue
 
             self.llm = LLM(**llm_params)
         else:
