@@ -1,0 +1,64 @@
+---
+title: Patronus Predefined Criteria Eval Tool 
+description: The `PatronusPredefinedCriteriaEvalTool` is designed to evaluate agent outputs for a specific criteria on the Patronus platform. The evaluation results for this are logged to [app.patronus.ai](https://app.patronus.ai)
+icon: shield
+---
+
+# `PatronusPredefinedCriteriaEvalTool`
+
+## Description
+
+The `PatronusPredefinedCriteriaEvalTool` is designed to evaluate agent outputs for a specific criteria on the Patronus platform. The evaluation results for this are logged to [app.patronus.ai](https://app.patronus.ai)
+It utilizes the [Patronus AI](https://patronus.ai/) API to 
+1. Evaluate the agent input, output, context and gold answer (if available) according to the criteria
+2. Logs the results to [app.patronus.ai](https://app.patronus.ai)
+
+## Installation
+
+To incorporate this tool into your project, follow the installation instructions below:
+
+```shell
+pip install 'crewai[tools]'
+```
+
+## Steps to Get Started
+
+Follow these steps correctly to use the PatronusPredefinedCriteriaEvalTool :
+
+1. Confirm that the `crewai[tools]` package is installed in your Python environment.
+2. Acquire a Patronus API key by registering for a free account at [patronus.ai](https://patronus.ai/).
+3. Export your API key using `export PATRONUS_API_KEY=[YOUR_KEY_HERE]` 
+
+## Example 
+
+This example demonstrates the use of the PatronusPredefinedCriteriaEvalTool for verifying if the generated content is code or not. Here, the agent selects the `contains-code` predefined-criteria, evaluates the output generated for the instruction and logs the results to [app.patronus.ai](https://app.patronus.ai)
+
+```python
+from crewai_tools import PatronusPredefinedCriteriaEvalTool
+patronus_eval_tool = PatronusPredifinedCriteriaEvalTool(
+    evaluators=[{"evaluator": "judge", "criteria": "contains-code"}] # Selecting the "contains-code" criteria and using the default "judge" from Patronus AI
+)
+
+coding_agent = Agent(
+	role="Coding Agent",
+	goal="Generate high quality code and verify that the output is code by using Patronus AI's evaluation tool.",
+	backstory="You are an experienced coder who can generate high quality python code. You can follow complex instructions accurately and effectively.",
+	tools=[patronus_eval_tool],
+	verbose=True,
+)
+
+generate_code = Task(
+	description="Create a simple program to generate the first N numbers in the Fibonacci sequence. Select the most appropriate evaluator and criteria for evaluating your output.",
+	expected_output="Program that generates the first N numbers in the Fibonacci sequence.",
+	agent=coding_agent,
+)
+
+crew = Crew(agents=[coding_agent], tasks=[generate_code])
+crew.kickoff()
+```
+
+## Conclusion
+
+Using `PatronusPredefinedCriteriaEvalTool`, users can conveniently evaluate the inputs, outputs and context provided to the agent. 
+Using patronus.ai, agents can choose from several of the pre-defined or custom defined criteria from the Patronus platform and evaluate their outputs, making it easier to debug agentic pipelines. 
+In the case where the user wants the agent to contextually select the criteria from the list available at [app.patronus.ai](https://app.patronus.ai) or if a local evaluation function is preferred (guide [here](https://docs.patronus.ai/docs/experiment-evaluators)), it is encouraged to use the `PatronusEvalTool` and `PatronusLocalEvaluatorTool` respectively.

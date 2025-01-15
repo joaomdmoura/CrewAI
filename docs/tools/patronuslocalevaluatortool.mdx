@@ -1,0 +1,74 @@
+---
+title: Patronus Local Evaluator Tool 
+description: The `PatronusLocalEvaluatorTool` is designed to evaluate agent inputs,outputs and context based on a user defined function and log evaluation results to [app.patronus.ai](http://app.patronus.ai)
+icon: shield
+---
+
+# `PatronusLocalEvaluatorTool`
+
+## Description
+
+The `PatronusLocalEvaluatorTool` is designed to evaluate agent inputs, outputs and context based on a user defined local function and log evaluation results to [app.patronus.ai](http://app.patronus.ai)
+It utilizes the [Patronus AI](https://patronus.ai/) API to 
+1. Evaluate the inputs/outputs/context according to the user defined metric/evaluation criteria
+2. Log the results to [app.patronus.ai](https://app.patronus.ai) where they can be visualized
+
+## Installation
+
+To incorporate this tool into your project, follow the installation instructions below:
+
+```shell
+pip install 'crewai[tools]'
+```
+
+## Steps to Get Started
+
+Follow these steps correctly to use the PatronusLocalEvaluatorTool :
+
+1. Confirm that the `crewai[tools]` package is installed in your Python environment.
+2. Acquire a Patronus API key by registering for a free account at [patronus.ai](https://patronus.ai/).
+3. Export your API key using `export PATRONUS_API_KEY=[YOUR_KEY_HERE]` 
+
+## Example 
+
+This example demonstrates the use of the PatronusLocalEvaluatorTool.
+
+```python
+from patronus import Client, EvaluationResult
+from crewai_tools import PatronusLocalEvaluatorTool
+
+client = Client()
+
+# Register a local evaluation function. For more details refer to https://docs.patronus.ai/docs/experiment-evaluators
+@client.register_local_evaluator("local_evaluator_name")
+def my_evaluator(**kwargs):
+    return EvaluationResult(pass_="PASS", score=0.5, explanation="Explanation test")
+
+patronus_eval_tool = PatronusLocalEvaluatorTool(
+    evaluator="local_evaluator_name", evaluated_model_gold_answer="test"
+)
+
+coding_agent = Agent(
+	role="Coding Agent",
+	goal="Generate high quality code and verify that the output is code by using Patronus AI's evaluation tool.",
+	backstory="You are an experienced coder who can generate high quality python code. You can follow complex instructions accurately and effectively.",
+	tools=[patronus_eval_tool],
+	verbose=True,
+)
+
+generate_code = Task(
+	description="Create a simple program to generate the first N numbers in the Fibonacci sequence. Select the most appropriate evaluator and criteria for evaluating your output.",
+	expected_output="Program that generates the first N numbers in the Fibonacci sequence.",
+	agent=coding_agent,
+)
+
+crew = Crew(agents=[coding_agent], tasks=[generate_code])
+crew.kickoff()
+```
+
+## Conclusion
+
+Using `PatronusLocalEvaluatorTool` users can easily and quickly define custom evaluation functions and help improve customer confidence in their agentic systems. 
+Using patronus.ai, users can conveniently log their custom metrics to [app.patronus.ai](https://app.patronus.ai), making it easier for the user to visualize trends and debug their agentic pipelines. 
+Users can also define their own criteria at [app.patronus.ai](https://app.patronus.ai) or let the agent choose an existing evaluator on the Patronus platform to help with custom evaluation needs. 
+For using custom-defined criteria and local evaluators it is encouraged to use the `PatronusPredifinedCriteriaEvalTool` and `PatronusEvalTool` respectively.

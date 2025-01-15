@@ -1,0 +1,63 @@
+---
+title: Patronus Eval Tool 
+description: The `PatronusEvalTool` is designed to evaluate agent inputs, outputs and context with a contextually selected criteria and log results to app.patronus.ai
+icon: shield
+---
+
+# `PatronusEvalTool`
+
+## Description
+
+The `PatronusEvalTool` is designed to evaluate agent inputs, outputs and context with a contextually selected criteria and log results to [app.patronus.ai](https://app.patronus.ai)
+It utilizes the [Patronus AI](https://patronus.ai/) API to 
+1. Fetch all available criteria for the specific user associated with the `PATRONUS_API_KEY`
+2. Select the most fitting criteria for the task according to the defined `Task`
+3. Evaluates the inputs/outputs/context according to the selected list of criteria and logs them to [app.patronus.ai](https://app.patronus.ai)
+
+## Installation
+
+To incorporate this tool into your project, follow the installation instructions below:
+
+```shell
+pip install 'crewai[tools]'
+```
+
+## Steps to Get Started
+
+Follow these steps correctly to use the PatronusEvalTool :
+
+1. Confirm that the `crewai[tools]` package is installed in your Python environment.
+2. Acquire a Patronus API key by registering for a free account at [patronus.ai](https://patronus.ai/).
+3. Export your API key using `export PATRONUS_API_KEY=[YOUR_KEY_HERE]` 
+
+## Example 
+
+This example demonstrates the use of the PatronusEvalTool for verifying if the generated content is code or not. Here, the agent selects the `contains-code` predefined-criteria, evaluates the output generated for the instruction and logs the results to [app.patronus.ai](https://app.patronus.ai)
+
+```python
+from crewai_tools import PatronusEvalTool
+tool = PatronusEvalTool()
+
+coding_agent = Agent(
+	role="Coding Agent",
+	goal="Generate high quality code and verify that the output is code by using Patronus AI's evaluation tool.",
+	backstory="You are an experienced coder who can generate high quality python code. You can follow complex instructions accurately and effectively.",
+	tools=[patronus_eval_tool],
+	verbose=True,
+)
+
+generate_code = Task(
+	description="Create a simple program to generate the first N numbers in the Fibonacci sequence. Select the most appropriate evaluator and criteria for evaluating your output.",
+	expected_output="Program that generates the first N numbers in the Fibonacci sequence.",
+	agent=coding_agent,
+)
+
+crew = Crew(agents=[coding_agent], tasks=[generate_code])
+crew.kickoff()
+```
+
+## Conclusion
+
+With the `PatronusEvalTool`, users can build confidence in their agentic systems and improve reliability of their product. 
+Using [patronus.ai](https://patronus.ai), agents can choose from several of the pre-defined or custom defined criteria from the platform and evaluate their outputs, making it easier for the user to debug their agentic pipelines.
+Users can also define their own criteria at [app.patronus.ai](https://app.patronus.ai) or local evaluation function (guide [here](https://docs.patronus.ai/docs/experiment-evaluators)) to help with custom evaluation needs. For using custom-defined criteria and local evaluators it is encouraged to use the `PatronusPredifinedCriteriaEvalTool` and `PatronusLocalEvaluatorTool` respectively.
