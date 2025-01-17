@@ -7,8 +7,7 @@ from typing import Any, Dict, List, Optional
 from crewai.task import Task
 from crewai.utilities import Printer
 from crewai.utilities.crew_json_encoder import CrewJSONEncoder
-from crewai.utilities.errors import DatabaseError, DatabaseOperationError
-from crewai.utilities.paths import db_storage_path
+from crewai.utilities.paths import DatabaseStorage, DatabaseOperationError
 
 logger = logging.getLogger(__name__)
 
@@ -18,13 +17,8 @@ class KickoffTaskOutputsSQLiteStorage:
     An updated SQLite storage class for kickoff task outputs storage.
     """
 
-    def __init__(
-        self, db_path: Optional[str] = None
-    ) -> None:
-        if db_path is None:
-            # Get the parent directory of the default db path and create our db file there
-            db_path = str(Path(db_storage_path()).parent / "latest_kickoff_task_outputs.db")
-        self.db_path = db_path
+    def __init__(self, db_storage: DatabaseStorage = DatabaseStorage()) -> None:
+        self.db_path = f"{db_storage.db_storage_path}/latest_kickoff_task_outputs.db"
         self._printer: Printer = Printer()
         self._initialize_db()
 

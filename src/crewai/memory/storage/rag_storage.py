@@ -11,7 +11,7 @@ from chromadb.api import ClientAPI
 from crewai.memory.storage.base_rag_storage import BaseRAGStorage
 from crewai.utilities import EmbeddingConfigurator
 from crewai.utilities.constants import MAX_FILE_NAME_LENGTH
-from crewai.utilities.paths import db_storage_path
+from crewai.utilities.paths import DatabaseStorage
 
 
 @contextlib.contextmanager
@@ -40,7 +40,13 @@ class RAGStorage(BaseRAGStorage):
     app: ClientAPI | None = None
 
     def __init__(
-        self, type, allow_reset=True, embedder_config=None, crew=None, path=None
+        self,
+        type,
+        allow_reset=True,
+        embedder_config=None,
+        crew=None,
+        path=None,
+        db_storage=DatabaseStorage(),
     ):
         super().__init__(type, allow_reset, embedder_config, crew)
         agents = crew.agents if crew else []
@@ -53,6 +59,7 @@ class RAGStorage(BaseRAGStorage):
 
         self.allow_reset = allow_reset
         self.path = path
+        self.db_storage_path = db_storage.db_storage_path
         self._initialize_app()
 
     def _set_embedder_config(self):
@@ -90,7 +97,7 @@ class RAGStorage(BaseRAGStorage):
         """
         Ensures file name does not exceed max allowed by OS
         """
-        base_path = f"{db_storage_path()}/{type}"
+        base_path = f"{self.db_storage_path}/{type}"
 
         if len(file_name) > MAX_FILE_NAME_LENGTH:
             logging.warning(
@@ -152,7 +159,7 @@ class RAGStorage(BaseRAGStorage):
         try:
             if self.app:
                 self.app.reset()
-                shutil.rmtree(f"{db_storage_path()}/{self.type}")
+                shutil.rmtree(f"{self.db_storage_path}/{self.type}")
                 self.app = None
                 self.collection = None
         except Exception as e:

@@ -16,7 +16,7 @@ from crewai.knowledge.storage.base_knowledge_storage import BaseKnowledgeStorage
 from crewai.utilities import EmbeddingConfigurator
 from crewai.utilities.constants import KNOWLEDGE_DIRECTORY
 from crewai.utilities.logger import Logger
-from crewai.utilities.paths import db_storage_path
+from crewai.utilities.paths import DatabaseStorage
 
 
 @contextlib.contextmanager
@@ -48,9 +48,11 @@ class KnowledgeStorage(BaseKnowledgeStorage):
 
     def __init__(
         self,
+        db_storage: DatabaseStorage = DatabaseStorage(),
         embedder_config: Optional[Dict[str, Any]] = None,
         collection_name: Optional[str] = None,
     ):
+        self.db_storage_path = db_storage.db_storage_path
         self.collection_name = collection_name
         self._set_embedder_config(embedder_config)
 
@@ -83,7 +85,7 @@ class KnowledgeStorage(BaseKnowledgeStorage):
                 raise Exception("Collection not initialized")
 
     def initialize_knowledge_storage(self):
-        base_path = os.path.join(db_storage_path(), "knowledge")
+        base_path = os.path.join(self.db_storage_path, "knowledge")
         chroma_client = chromadb.PersistentClient(
             path=base_path,
             settings=Settings(allow_reset=True),
@@ -107,7 +109,7 @@ class KnowledgeStorage(BaseKnowledgeStorage):
             raise Exception("Failed to create or get collection")
 
     def reset(self):
-        base_path = os.path.join(db_storage_path(), KNOWLEDGE_DIRECTORY)
+        base_path = os.path.join(self.db_storage_path, KNOWLEDGE_DIRECTORY)
         if not self.app:
             self.app = chromadb.PersistentClient(
                 path=base_path,
