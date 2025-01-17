@@ -11,7 +11,9 @@ class I18N(BaseModel):
     _prompts: Dict[str, Dict[str, str]] = PrivateAttr()
     prompt_file: Optional[str] = Field(
         default=None,
-        description="Path to the prompt_file file to load",
+        description="Path to the prompt_file file to load. "
+                    "If not provided, $CREWAI_PROMPT_FILE will be checked. "
+                    "If also not set, uses the default prompts"
     )
 
     @model_validator(mode="after")
@@ -22,8 +24,10 @@ class I18N(BaseModel):
                 with open(self.prompt_file, "r", encoding="utf-8") as f:
                     self._prompts = json.load(f)
             else:
-                dir_path = os.path.dirname(os.path.realpath(__file__))
-                prompts_path = os.path.join(dir_path, "../translations/en.json")
+                prompts_path = os.environ.get("CREWAI_PROMPT_FILE")
+                if not prompts_path:
+                    dir_path = os.path.dirname(os.path.realpath(__file__))
+                    prompts_path = os.path.join(dir_path, "../translations/en.json")
 
                 with open(prompts_path, "r", encoding="utf-8") as f:
                     self._prompts = json.load(f)

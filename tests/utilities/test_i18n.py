@@ -42,3 +42,24 @@ def test_prompt_file():
     i18n.load_prompts()
     assert isinstance(i18n.retrieve("slices", "role_playing"), str)
     assert i18n.retrieve("slices", "role_playing") == "Lorem ipsum dolor sit amet"
+
+
+def test_prompt_file_env():
+    import os
+
+    path = os.path.join(os.path.dirname(__file__), "prompts.json")
+    old_env = os.environ.get("CREWAI_PROMPT_FILE")
+    try:
+        os.environ["CREWAI_PROMPT_FILE"] = path
+        i18n = I18N()
+        i18n.load_prompts()
+        assert i18n.retrieve("slices", "role_playing") == "Lorem ipsum dolor sit amet"
+    finally:
+        if old_env:
+            os.environ["CREWAI_PROMPT_FILE"] = old_env
+        else:
+            del os.environ["CREWAI_PROMPT_FILE"]
+
+    i18n = I18N()
+    i18n.load_prompts()
+    assert i18n.retrieve("slices", "role_playing") != "Lorem ipsum dolor sit amet"
