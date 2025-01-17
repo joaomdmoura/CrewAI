@@ -1,5 +1,6 @@
 import json
 import sqlite3
+from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
 from crewai.utilities import Printer
@@ -14,6 +15,8 @@ class LTMSQLiteStorage:
     def __init__(self, db_storage: DatabaseStorage = DatabaseStorage()) -> None:
         self.db_path: str = f"{db_storage.db_storage_path}/long_term_memory_storage.db"
         self._printer: Printer = Printer()
+        # Ensure parent directory exists
+        Path(self.db_path).parent.mkdir(parents=True, exist_ok=True)
         self._initialize_db()
 
     def _initialize_db(self):

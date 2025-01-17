@@ -2,11 +2,12 @@ from crewai.types.usage_metrics import UsageMetrics
 
 
 class TokenProcess:
-    total_tokens: int = 0
-    prompt_tokens: int = 0
-    cached_prompt_tokens: int = 0
-    completion_tokens: int = 0
-    successful_requests: int = 0
+    def __init__(self):
+        self.total_tokens: int = 0
+        self.prompt_tokens: int = 0
+        self.cached_prompt_tokens: int = 0
+        self.completion_tokens: int = 0
+        self.successful_requests: int = 0
 
     def sum_prompt_tokens(self, tokens: int):
         self.prompt_tokens = self.prompt_tokens + tokens

@@ -1,0 +1,114 @@
+interactions:
+- request:
+    body: '{"messages": [{"role": "user", "content": "Name: Alice, Age: 30"}], "model":
+      "gpt-4o-mini", "tool_choice": {"type": "function", "function": {"name": "SimpleModel"}},
+      "tools": [{"type": "function", "function": {"name": "SimpleModel", "description":
+      "Correctly extracted `SimpleModel` with all the required parameters with correct
+      types", "parameters": {"properties": {"name": {"title": "Name", "type": "string"},
+      "age": {"title": "Age", "type": "integer"}}, "required": ["age", "name"], "type":
+      "object"}}}]}'
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      content-length:
+      - '507'
+      content-type:
+      - application/json
+      host:
+      - api.openai.com
+      user-agent:
+      - OpenAI/Python 1.59.6
+      x-stainless-arch:
+      - arm64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - MacOS
+      x-stainless-package-version:
+      - 1.59.6
+      x-stainless-raw-response:
+      - 'true'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.12.7
+    method: POST
+    uri: https://api.openai.com/v1/chat/completions
+  response:
+    content: "{\n  \"id\": \"chatcmpl-Aq4a4xDv8G0i4fbTtPJEI2B8UNBup\",\n  \"object\":
+      \"chat.completion\",\n  \"created\": 1736974028,\n  \"model\": \"gpt-4o-mini-2024-07-18\",\n
+      \ \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\":
+      \"assistant\",\n        \"content\": null,\n        \"tool_calls\": [\n          {\n
+      \           \"id\": \"call_uO5nec8hTk1fpYINM8TUafhe\",\n            \"type\":
+      \"function\",\n            \"function\": {\n              \"name\": \"SimpleModel\",\n
+      \             \"arguments\": \"{\\\"name\\\":\\\"Alice\\\",\\\"age\\\":30}\"\n
+      \           }\n          }\n        ],\n        \"refusal\": null\n      },\n
+      \     \"logprobs\": null,\n      \"finish_reason\": \"stop\"\n    }\n  ],\n
+      \ \"usage\": {\n    \"prompt_tokens\": 79,\n    \"completion_tokens\": 10,\n
+      \   \"total_tokens\": 89,\n    \"prompt_tokens_details\": {\n      \"cached_tokens\":
+      0,\n      \"audio_tokens\": 0\n    },\n    \"completion_tokens_details\": {\n
+      \     \"reasoning_tokens\": 0,\n      \"audio_tokens\": 0,\n      \"accepted_prediction_tokens\":
+      0,\n      \"rejected_prediction_tokens\": 0\n    }\n  },\n  \"service_tier\":
+      \"default\",\n  \"system_fingerprint\": \"fp_72ed7ab54c\"\n}\n"
+    headers:
+      CF-Cache-Status:
+      - DYNAMIC
+      CF-RAY:
+      - 9028b81aeb1cb05f-ATL
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Date:
+      - Wed, 15 Jan 2025 20:47:08 GMT
+      Server:
+      - cloudflare
+      Set-Cookie:
+      - __cf_bm=PzayZLF04c14veGc.0ocVg3VHBbpzKRW8Hqox8L9U7c-1736974028-1.0.1.1-mZpK8.SH9l7K2z8Tvt6z.dURiVPjFqEz7zYEITfRwdr5z0razsSebZGN9IRPmI5XC_w5rbZW2Kg6hh5cenXinQ;
+        path=/; expires=Wed, 15-Jan-25 21:17:08 GMT; domain=.api.openai.com; HttpOnly;
+        Secure; SameSite=None
+      - _cfuvid=ciwC3n2Srn20xx4JhEUeN6Ap0tNBaE44S95nIilboQ0-1736974028496-0.0.1.1-604800000;
+        path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None
+      Transfer-Encoding:
+      - chunked
+      X-Content-Type-Options:
+      - nosniff
+      access-control-expose-headers:
+      - X-Request-ID
+      alt-svc:
+      - h3=":443"; ma=86400
+      openai-organization:
+      - crewai-iuxna1
+      openai-processing-ms:
+      - '439'
+      openai-version:
+      - '2020-10-01'
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      x-ratelimit-limit-requests:
+      - '30000'
+      x-ratelimit-limit-tokens:
+      - '150000000'
+      x-ratelimit-remaining-requests:
+      - '29999'
+      x-ratelimit-remaining-tokens:
+      - '149999978'
+      x-ratelimit-reset-requests:
+      - 2ms
+      x-ratelimit-reset-tokens:
+      - 0s
+      x-request-id:
+      - req_a468000458b9d2848b7497b2e3d485a3
+    http_version: HTTP/1.1
+    status_code: 200
+version: 1

@@ -23,11 +23,15 @@ class TokenCalcHandler(CustomLogger):
 
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", UserWarning)
-            usage: Usage = response_obj["usage"]
-            self.token_cost_process.sum_successful_requests(1)
-            self.token_cost_process.sum_prompt_tokens(usage.prompt_tokens)
-            self.token_cost_process.sum_completion_tokens(usage.completion_tokens)
-            if usage.prompt_tokens_details:
-                self.token_cost_process.sum_cached_prompt_tokens(
-                    usage.prompt_tokens_details.cached_tokens
-                )
+            if isinstance(response_obj, dict) and "usage" in response_obj:
+                usage: Usage = response_obj["usage"]
+                if usage:
+                    self.token_cost_process.sum_successful_requests(1)
+                    if hasattr(usage, "prompt_tokens"):
+                        self.token_cost_process.sum_prompt_tokens(usage.prompt_tokens)
+                    if hasattr(usage, "completion_tokens"):
+                        self.token_cost_process.sum_completion_tokens(usage.completion_tokens)
+                    if hasattr(usage, "prompt_tokens_details") and usage.prompt_tokens_details:
+                        self.token_cost_process.sum_cached_prompt_tokens(
+                            usage.prompt_tokens_details.cached_tokens
+                        )

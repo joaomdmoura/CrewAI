@@ -293,6 +293,26 @@ my_crew = Crew(
     }
 )
 ```
+### Using VoyageAI embeddings
+
+```python Code
+from crewai import Crew, Agent, Task, Process
+
+my_crew = Crew(
+    agents=[...],
+    tasks=[...],
+    process=Process.sequential,
+    memory=True,
+    verbose=True,
+    embedder={
+        "provider": "voyageai",
+        "config": {
+            "api_key": "YOUR_API_KEY",
+            "model_name": "<model_name>"
+        }
+    }
+)
+```
 ### Using HuggingFace embeddings
 
 ```python Code

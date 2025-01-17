@@ -14,6 +14,7 @@ class EmbeddingConfigurator:
             "vertexai": self._configure_vertexai,
             "google": self._configure_google,
             "cohere": self._configure_cohere,
+            "voyageai": self._configure_voyageai,
             "bedrock": self._configure_bedrock,
             "huggingface": self._configure_huggingface,
             "watson": self._configure_watson,
@@ -120,6 +121,17 @@ class EmbeddingConfigurator:
         )
 
         return CohereEmbeddingFunction(
+            model_name=model_name,
+            api_key=config.get("api_key"),
+        )
+
+    @staticmethod
+    def _configure_voyageai(config, model_name):
+        from chromadb.utils.embedding_functions.voyageai_embedding_function import (
+            VoyageAIEmbeddingFunction,
+        )
+
+        return VoyageAIEmbeddingFunction(
             model_name=model_name,
             api_key=config.get("api_key"),
         )

@@ -222,6 +222,19 @@ class LLM:
                 ].message
                 text_response = response_message.content or ""
                 tool_calls = getattr(response_message, "tool_calls", [])
+                
+                # Ensure callbacks get the full response object with usage info
+                if callbacks and len(callbacks) > 0:
+                    for callback in callbacks:
+                        if hasattr(callback, "log_success_event"):
+                            usage_info = getattr(response, "usage", None)
+                            if usage_info:
+                                callback.log_success_event(
+                                    kwargs=params,
+                                    response_obj={"usage": usage_info},
+                                    start_time=0,
+                                    end_time=0,
+                                )
 
                 # --- 2) If no tool calls, return the text response
                 if not tool_calls or not available_functions:

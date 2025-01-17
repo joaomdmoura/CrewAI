@@ -26,17 +26,24 @@ class Converter(OutputConverter):
             if self.llm.supports_function_calling():
                 return self._create_instructor().to_pydantic()
             else:
-                return self.llm.call(
+                response = self.llm.call(
                     [
                         {"role": "system", "content": self.instructions},
                         {"role": "user", "content": self.text},
                     ]
                 )
+                return self.model.model_validate_json(response)
+        except ValidationError as e:
+            if current_attempt < self.max_attempts:
+                return self.to_pydantic(current_attempt + 1)
+            raise ConverterError(
+                f"Failed to convert text into a Pydantic model due to the following validation error: {e}"
+            )
         except Exception as e:
             if current_attempt < self.max_attempts:
                 return self.to_pydantic(current_attempt + 1)
-            return ConverterError(
-                f"Failed to convert text into a pydantic model due to the following error: {e}"
+            raise ConverterError(
+                f"Failed to convert text into a Pydantic model due to the following error: {e}"
             )
 
     def to_json(self, current_attempt=1):
@@ -66,7 +73,6 @@ class Converter(OutputConverter):
             llm=self.llm,
             model=self.model,
             content=self.text,
-            instructions=self.instructions,
         )
         return inst
 
@@ -187,10 +193,15 @@ def convert_with_instructions(
 
 
 def get_conversion_instructions(model: Type[BaseModel], llm: Any) -> str:
-    instructions = "I'm gonna convert this raw text into valid JSON."
+    instructions = "Please convert the following text into valid JSON."
     if llm.supports_function_calling():
         model_schema = PydanticSchemaParser(model=model).get_schema()
-        instructions = f"{instructions}\n\nThe json should have the following structure, with the following keys:\n{model_schema}"
+        instructions += (
+            f"\n\nThe JSON should follow this schema:\n```json\n{model_schema}\n```"
+        )
+    else:
+        model_description = generate_model_description(model)
+        instructions += f"\n\nThe JSON should follow this format:\n{model_description}"
     return instructions
 
 
@@ -230,9 +241,13 @@ def generate_model_description(model: Type[BaseModel]) -> str:
         origin = get_origin(field_type)
         args = get_args(field_type)
 
-        if origin is Union and type(None) in args:
+        if origin is Union or (origin is None and len(args) > 0):
+            # Handle both Union and the new '|' syntax
             non_none_args = [arg for arg in args if arg is not type(None)]
-            return f"Optional[{describe_field(non_none_args[0])}]"
+            if len(non_none_args) == 1:
+                return f"Optional[{describe_field(non_none_args[0])}]"
+            else:
+                return f"Optional[Union[{', '.join(describe_field(arg) for arg in non_none_args)}]]"
         elif origin is list:
             return f"List[{describe_field(args[0])}]"
         elif origin is dict:
@@ -241,8 +256,10 @@ def generate_model_description(model: Type[BaseModel]) -> str:
             return f"Dict[{key_type}, {value_type}]"
         elif isinstance(field_type, type) and issubclass(field_type, BaseModel):
             return generate_model_description(field_type)
-        else:
+        elif hasattr(field_type, "__name__"):
             return field_type.__name__
+        else:
+            return str(field_type)
 
     fields = model.__annotations__
     field_descriptions = [

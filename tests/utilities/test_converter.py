@@ -39,6 +39,22 @@ class NestedModel(BaseModel):
     data: SimpleModel
 
 
+class Address(BaseModel):
+    street: str
+    city: str
+    zip_code: str
+
+
+class Person(BaseModel):
+    name: str
+    age: int
+    address: Address
+
+
+class CustomConverter(Converter):
+    pass
+
+
 # Fixtures
 @pytest.fixture
 def mock_agent():
@@ -199,26 +215,23 @@ def test_convert_with_instructions_failure(
 
 # Tests for get_conversion_instructions
 def test_get_conversion_instructions_gpt():
-    mock_llm = Mock()
-    mock_llm.openai_api_base = None
+    llm = LLM(model="gpt-4o-mini")
     with patch.object(LLM, "supports_function_calling") as supports_function_calling:
         supports_function_calling.return_value = True
-        instructions = get_conversion_instructions(SimpleModel, mock_llm)
+        instructions = get_conversion_instructions(SimpleModel, llm)
         model_schema = PydanticSchemaParser(model=SimpleModel).get_schema()
         assert (
             instructions
-            == f"I'm gonna convert this raw text into valid JSON.\n\nThe json should have the following structure, with the following keys:\n{model_schema}"
+            == f"Please convert the following text into valid JSON.\n\nThe JSON should follow this schema:\n```json\n{model_schema}\n```"
         )
 
 
 def test_get_conversion_instructions_non_gpt():
-    mock_llm = Mock()
-    with patch.object(LLM, "supports_function_calling") as supports_function_calling:
-        supports_function_calling.return_value = False
-        with patch("crewai.utilities.converter.PydanticSchemaParser") as mock_parser:
-            mock_parser.return_value.get_schema.return_value = "Sample schema"
-            instructions = get_conversion_instructions(SimpleModel, mock_llm)
-            assert "Sample schema" in instructions
+    llm = LLM(model="ollama/llama3.1", base_url="http://localhost:11434")
+    with patch.object(LLM, "supports_function_calling", return_value=False):
+        instructions = get_conversion_instructions(SimpleModel, llm)
+        assert '"name": str' in instructions
+        assert '"age": int' in instructions
 
 
 # Tests for is_gpt
@@ -230,10 +243,6 @@ def test_supports_function_calling_true():
 def test_supports_function_calling_false():
     llm = LLM(model="non-existent-model")
     assert llm.supports_function_calling() is False
-
-
-class CustomConverter(Converter):
-    pass
 
 
 def test_create_converter_with_mock_agent():
@@ -255,7 +264,7 @@ def test_create_converter_with_mock_agent():
 def test_create_converter_with_custom_converter():
     converter = create_converter(
         converter_cls=CustomConverter,
-        llm=Mock(),
+        llm=LLM(model="gpt-4o-mini"),
         text="Sample",
         model=SimpleModel,
         instructions="Convert",
@@ -312,4 +321,279 @@ def test_generate_model_description_dict_field():
 
     description = generate_model_description(ModelWithDictField)
     expected_description = '{\n  "attributes": Dict[str, int]\n}'
+    assert description == expected_description
+
+
+@pytest.mark.vcr(filter_headers=["authorization"])
+def test_convert_with_instructions():
+    llm = LLM(model="gpt-4o-mini")
+    sample_text = "Name: Alice, Age: 30"
+
+    instructions = get_conversion_instructions(SimpleModel, llm)
+    converter = Converter(
+        llm=llm,
+        text=sample_text,
+        model=SimpleModel,
+        instructions=instructions,
+    )
+
+    # Act
+    output = converter.to_pydantic()
+
+    # Assert
+    assert isinstance(output, SimpleModel)
+    assert output.name == "Alice"
+    assert output.age == 30
+
+
+@pytest.mark.vcr(filter_headers=["authorization"])
+def test_converter_with_llama3_2_model():
+    llm = LLM(model="ollama/llama3.2:3b", base_url="http://localhost:11434")
+
+    sample_text = "Name: Alice Llama, Age: 30"
+
+    instructions = get_conversion_instructions(SimpleModel, llm)
+    converter = Converter(
+        llm=llm,
+        text=sample_text,
+        model=SimpleModel,
+        instructions=instructions,
+    )
+
+    output = converter.to_pydantic()
+
+    assert isinstance(output, SimpleModel)
+    assert output.name == "Alice Llama"
+    assert output.age == 30
+
+
+@pytest.mark.vcr(filter_headers=["authorization"])
+def test_converter_with_llama3_1_model():
+    llm = LLM(model="ollama/llama3.1", base_url="http://localhost:11434")
+    sample_text = "Name: Alice Llama, Age: 30"
+
+    instructions = get_conversion_instructions(SimpleModel, llm)
+    converter = Converter(
+        llm=llm,
+        text=sample_text,
+        model=SimpleModel,
+        instructions=instructions,
+    )
+
+    output = converter.to_pydantic()
+
+    assert isinstance(output, SimpleModel)
+    assert output.name == "Alice Llama"
+    assert output.age == 30
+
+
+@pytest.mark.vcr(filter_headers=["authorization"])
+def test_converter_with_nested_model():
+    llm = LLM(model="gpt-4o-mini")
+    sample_text = "Name: John Doe\nAge: 30\nAddress: 123 Main St, Anytown, 12345"
+
+    instructions = get_conversion_instructions(Person, llm)
+    converter = Converter(
+        llm=llm,
+        text=sample_text,
+        model=Person,
+        instructions=instructions,
+    )
+
+    output = converter.to_pydantic()
+
+    assert isinstance(output, Person)
+    assert output.name == "John Doe"
+    assert output.age == 30
+    assert isinstance(output.address, Address)
+    assert output.address.street == "123 Main St"
+    assert output.address.city == "Anytown"
+    assert output.address.zip_code == "12345"
+
+
+# Tests for error handling
+def test_converter_error_handling():
+    llm = Mock(spec=LLM)
+    llm.supports_function_calling.return_value = False
+    llm.call.return_value = "Invalid JSON"
+    sample_text = "Name: Alice, Age: 30"
+
+    instructions = get_conversion_instructions(SimpleModel, llm)
+    converter = Converter(
+        llm=llm,
+        text=sample_text,
+        model=SimpleModel,
+        instructions=instructions,
+    )
+
+    with pytest.raises(ConverterError) as exc_info:
+        output = converter.to_pydantic()
+
+    assert "Failed to convert text into a Pydantic model" in str(exc_info.value)
+
+
+# Tests for retry logic
+def test_converter_retry_logic():
+    llm = Mock(spec=LLM)
+    llm.supports_function_calling.return_value = False
+    llm.call.side_effect = [
+        "Invalid JSON",
+        "Still invalid",
+        '{"name": "Retry Alice", "age": 30}',
+    ]
+    sample_text = "Name: Retry Alice, Age: 30"
+
+    instructions = get_conversion_instructions(SimpleModel, llm)
+    converter = Converter(
+        llm=llm,
+        text=sample_text,
+        model=SimpleModel,
+        instructions=instructions,
+        max_attempts=3,
+    )
+
+    output = converter.to_pydantic()
+
+    assert isinstance(output, SimpleModel)
+    assert output.name == "Retry Alice"
+    assert output.age == 30
+    assert llm.call.call_count == 3
+
+
+# Tests for optional fields
+def test_converter_with_optional_fields():
+    class OptionalModel(BaseModel):
+        name: str
+        age: Optional[int]
+
+    llm = Mock(spec=LLM)
+    llm.supports_function_calling.return_value = False
+    # Simulate the LLM's response with 'age' explicitly set to null
+    llm.call.return_value = '{"name": "Bob", "age": null}'
+    sample_text = "Name: Bob, age: None"
+
+    instructions = get_conversion_instructions(OptionalModel, llm)
+    converter = Converter(
+        llm=llm,
+        text=sample_text,
+        model=OptionalModel,
+        instructions=instructions,
+    )
+
+    output = converter.to_pydantic()
+
+    assert isinstance(output, OptionalModel)
+    assert output.name == "Bob"
+    assert output.age is None
+
+
+# Tests for list fields
+def test_converter_with_list_field():
+    class ListModel(BaseModel):
+        items: List[int]
+
+    llm = Mock(spec=LLM)
+    llm.supports_function_calling.return_value = False
+    llm.call.return_value = '{"items": [1, 2, 3]}'
+    sample_text = "Items: 1, 2, 3"
+
+    instructions = get_conversion_instructions(ListModel, llm)
+    converter = Converter(
+        llm=llm,
+        text=sample_text,
+        model=ListModel,
+        instructions=instructions,
+    )
+
+    output = converter.to_pydantic()
+
+    assert isinstance(output, ListModel)
+    assert output.items == [1, 2, 3]
+
+
+# Tests for enums
+from enum import Enum
+
+
+def test_converter_with_enum():
+    class Color(Enum):
+        RED = "red"
+        GREEN = "green"
+        BLUE = "blue"
+
+    class EnumModel(BaseModel):
+        name: str
+        color: Color
+
+    llm = Mock(spec=LLM)
+    llm.supports_function_calling.return_value = False
+    llm.call.return_value = '{"name": "Alice", "color": "red"}'
+    sample_text = "Name: Alice, Color: Red"
+
+    instructions = get_conversion_instructions(EnumModel, llm)
+    converter = Converter(
+        llm=llm,
+        text=sample_text,
+        model=EnumModel,
+        instructions=instructions,
+    )
+
+    output = converter.to_pydantic()
+
+    assert isinstance(output, EnumModel)
+    assert output.name == "Alice"
+    assert output.color == Color.RED
+
+
+# Tests for ambiguous input
+def test_converter_with_ambiguous_input():
+    llm = Mock(spec=LLM)
+    llm.supports_function_calling.return_value = False
+    llm.call.return_value = '{"name": "Charlie", "age": "Not an age"}'
+    sample_text = "Charlie is thirty years old"
+
+    instructions = get_conversion_instructions(SimpleModel, llm)
+    converter = Converter(
+        llm=llm,
+        text=sample_text,
+        model=SimpleModel,
+        instructions=instructions,
+    )
+
+    with pytest.raises(ConverterError) as exc_info:
+        output = converter.to_pydantic()
+
+    assert "validation error" in str(exc_info.value).lower()
+
+
+# Tests for function calling support
+def test_converter_with_function_calling():
+    llm = Mock(spec=LLM)
+    llm.supports_function_calling.return_value = True
+
+    instructor = Mock()
+    instructor.to_pydantic.return_value = SimpleModel(name="Eve", age=35)
+
+    converter = Converter(
+        llm=llm,
+        text="Name: Eve, Age: 35",
+        model=SimpleModel,
+        instructions="Convert this text.",
+    )
+    converter._create_instructor = Mock(return_value=instructor)
+
+    output = converter.to_pydantic()
+
+    assert isinstance(output, SimpleModel)
+    assert output.name == "Eve"
+    assert output.age == 35
+    instructor.to_pydantic.assert_called_once()
+
+
+def test_generate_model_description_union_field():
+    class UnionModel(BaseModel):
+        field: int | str | None
+
+    description = generate_model_description(UnionModel)
+    expected_description = '{\n  "field": int | str | None\n}'
     assert description == expected_description

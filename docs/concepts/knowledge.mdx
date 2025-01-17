@@ -93,6 +93,12 @@ result = crew.kickoff(inputs={"question": "What city does John live in and how o
 
 Here's another example with the `CrewDoclingSource`. The CrewDoclingSource is actually quite versatile and can handle multiple file formats including TXT, PDF, DOCX, HTML, and more. 
 
+<Note>
+  You need to install `docling` for the following example to work: `uv add docling`
+</Note>
+
+
+
 ```python Code
 from crewai import LLM, Agent, Crew, Process, Task
 from crewai.knowledge.source.crew_docling_source import CrewDoclingSource
@@ -282,6 +288,7 @@ The `embedder` parameter supports various embedding model providers that include
 - `ollama`: Local embeddings with Ollama
 - `vertexai`: Google Cloud VertexAI embeddings
 - `cohere`: Cohere's embedding models
+- `voyageai`: VoyageAI's embedding models
 - `bedrock`: AWS Bedrock embeddings
 - `huggingface`: Hugging Face models
 - `watson`: IBM Watson embeddings
