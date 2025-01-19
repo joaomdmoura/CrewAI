@@ -6,8 +6,8 @@ icon: database
 
 ## Introduction to Memory Systems in CrewAI
 
-The crewAI framework introduces a sophisticated memory system designed to significantly enhance the capabilities of AI agents. 
-This system comprises `short-term memory`, `long-term memory`, `entity memory`, and `contextual memory`, each serving a unique purpose in aiding agents to remember, 
+The crewAI framework introduces a sophisticated memory system designed to significantly enhance the capabilities of AI agents.
+This system comprises `short-term memory`, `long-term memory`, `entity memory`, and `contextual memory`, each serving a unique purpose in aiding agents to remember,
 reason, and learn from past interactions.
 
 ## Memory System Components
@@ -31,8 +31,8 @@ reason, and learn from past interactions.
 ## Implementing Memory in Your Crew
 
 When configuring a crew, you can enable and customize each memory component to suit the crew's objectives and the nature of tasks it will perform.
-By default, the memory system is disabled, and you can ensure it is active by setting `memory=True` in the crew configuration. 
-The memory will use OpenAI embeddings by default, but you can change it by setting `embedder` to a different model. 
+By default, the memory system is disabled, and you can ensure it is active by setting `memory=True` in the crew configuration.
+The memory will use OpenAI embeddings by default, but you can change it by setting `embedder` to a different model.
 It's also possible to initialize the memory instance with your own instance.
 
 The 'embedder' only applies to **Short-Term Memory** which uses Chroma for RAG.
@@ -95,7 +95,7 @@ my_crew = Crew(
 
 ## Integrating Mem0 for Enhanced User Memory
 
-[Mem0](https://mem0.ai/) is a self-improving memory layer for LLM applications, enabling personalized AI experiences. 
+[Mem0](https://mem0.ai/) is a self-improving memory layer for LLM applications, enabling personalized AI experiences.
 
 To include user-specific memory you can get your API key [here](https://app.mem0.ai/dashboard/api-keys) and refer the [docs](https://docs.mem0.ai/platform/quickstart#4-1-create-memories) for adding user preferences.
 
@@ -185,7 +185,7 @@ my_crew = Crew(
     process=Process.sequential,
     memory=True,
     verbose=True,
-    embedder=OpenAIEmbeddingFunction(api_key=os.getenv("OPENAI_API_KEY"), model_name="text-embedding-3-small"),
+    embedder={'provider':OpenAIEmbeddingFunction(api_key=os.getenv("OPENAI_API_KEY"), model_name="text-embedding-3-small")},
 )
 ```
 
@@ -242,13 +242,13 @@ my_crew = Crew(
     process=Process.sequential,
     memory=True,
     verbose=True,
-    embedder=OpenAIEmbeddingFunction(
+    embedder={'provider':OpenAIEmbeddingFunction(
         api_key="YOUR_API_KEY",
         api_base="YOUR_API_BASE_PATH",
         api_type="azure",
         api_version="YOUR_API_VERSION",
         model_name="text-embedding-3-small"
-    )
+    )}
 )
 ```
 
@@ -383,5 +383,5 @@ crewai reset-memories [OPTIONS]
 
 ## Conclusion
 
-Integrating CrewAI's memory system into your projects is straightforward. By leveraging the provided memory components and configurations, 
+Integrating CrewAI's memory system into your projects is straightforward. By leveraging the provided memory components and configurations,
 you can quickly empower your agents with the ability to remember, reason, and learn from their interactions, unlocking new levels of intelligence and capability.
