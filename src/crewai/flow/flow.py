@@ -499,12 +499,8 @@ class Flow(Generic[T], metaclass=FlowMeta):
             elif kwargs and "id" in kwargs:
                 self._log_flow_event(f"Loading flow state from memory for ID: {kwargs['id']}", color="bold_yellow")
                 stored_state = self._persistence.load_state(kwargs["id"])
-                if not stored_state:
-                    # For kwargs["id"], we allow creating new state if not found
-                    self._state = self._create_initial_state()
-                    if kwargs:
-                        self._initialize_state(kwargs)
-                    return
+                # Don't return early if state not found - let the normal initialization flow handle it
+                # This ensures proper state initialization and override behavior
 
         # Initialize state based on persistence and kwargs
         if stored_state:
