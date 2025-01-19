@@ -1,78 +1,117 @@
 ---
-title: Composio Tool
-description: The `ComposioTool` is a wrapper around the composio set of tools and gives your agent access to a wide variety of tools from the Composio SDK.
+title: Composio
+description: Composio provides 250+ production-ready tools for AI agents with flexible authentication management.
 icon: gear-code
 ---
 
-# `ComposioTool`
+# `ComposioToolSet`
 
 ## Description
+Composio is an integration platform that allows you to connect your AI agents to 250+ tools. Key features include:
 
-This tools is a wrapper around the composio set of tools and gives your agent access to a wide variety of tools from the Composio SDK.
+- **Enterprise-Grade Authentication**: Built-in support for OAuth, API Keys, JWT with automatic token refresh
+- **Full Observability**: Detailed tool usage logs, execution timestamps, and more
 
 ## Installation
 
-To incorporate this tool into your project, follow the installation instructions below:
+To incorporate Composio tools into your project, follow the instructions below:
 
 ```shell
-pip install composio-core
-pip install 'crewai[tools]'
+pip install composio-crewai
+pip install crewai
 ```
 
-after the installation is complete, either run `composio login` or export your composio API key as `COMPOSIO_API_KEY`.
+After the installation is complete, either run `composio login` or export your composio API key as `COMPOSIO_API_KEY`. Get your Composio API key from [here](https://app.composio.dev)
 
 ## Example
 
 The following example demonstrates how to initialize the tool and execute a github action:
 
-1. Initialize Composio tools
+1. Initialize Composio toolset
 
 ```python Code
-from composio import App
-from crewai_tools import ComposioTool
-from crewai import Agent, Task
+from composio_crewai import ComposioToolSet, App, Action
+from crewai import Agent, Task, Crew
 
-
-tools = [ComposioTool.from_action(action=Action.GITHUB_ACTIVITY_STAR_REPO_FOR_AUTHENTICATED_USER)]
+toolset = ComposioToolSet()
 ```
 
-If you don't know what action you want to use, use `from_app` and `tags` filter to get relevant actions
-
+2. Connect your GitHub account
+<CodeGroup>
+```shell CLI
+composio add github
+```
 ```python Code
-tools = ComposioTool.from_app(App.GITHUB, tags=["important"])
+request = toolset.initiate_connection(app=App.GITHUB)
+print(f"Open this URL to authenticate: {request.redirectUrl}")
 ```
+</CodeGroup>
 
-or use `use_case` to search relevant actions
+3. Get Tools
 
+- Retrieving all the tools from an app (not recommended for production):
 ```python Code
-tools = ComposioTool.from_app(App.GITHUB, use_case="Star a github repository")
+tools = toolset.get_tools(apps=[App.GITHUB])
 ```
 
-2. Define agent
+- Filtering tools based on tags:
+```python Code
+tag = "users"
+
+filtered_action_enums = toolset.find_actions_by_tags(
+    App.GITHUB,
+    tags=[tag], 
+)
+
+tools = toolset.get_tools(actions=filtered_action_enums)
+```
+
+- Filtering tools based on use case:
+```python Code
+use_case = "Star a repository on GitHub"
+
+filtered_action_enums = toolset.find_actions_by_use_case(
+    App.GITHUB, use_case=use_case, advanced=False
+)
+
+tools = toolset.get_tools(actions=filtered_action_enums)
+```<Tip>Set `advanced` to True to get actions for complex use cases</Tip>
+
+- Using specific tools:
+
+In this demo, we will use the `GITHUB_STAR_A_REPOSITORY_FOR_THE_AUTHENTICATED_USER` action from the GitHub app.
+```python Code
+tools = toolset.get_tools(
+    actions=[Action.GITHUB_STAR_A_REPOSITORY_FOR_THE_AUTHENTICATED_USER]
+)
+```
+Learn more about filtering actions [here](https://docs.composio.dev/patterns/tools/use-tools/use-specific-actions)
+
+4. Define agent
 
 ```python Code
 crewai_agent = Agent(
-    role="Github Agent",
-    goal="You take action on Github using Github APIs",
-    backstory=(
-        "You are AI agent that is responsible for taking actions on Github "
-        "on users behalf. You need to take action on Github using Github APIs"
-    ),
+    role="GitHub Agent",
+    goal="You take action on GitHub using GitHub APIs",
+    backstory="You are AI agent that is responsible for taking actions on GitHub on behalf of users using GitHub APIs",
     verbose=True,
     tools=tools,
+    llm= # pass an llm
 )
 ```
 
-3. Execute task
+5. Execute task
 
 ```python Code
 task = Task(
-    description="Star a repo ComposioHQ/composio on GitHub",
+    description="Star a repo composiohq/composio on GitHub",
     agent=crewai_agent,
-    expected_output="if the star happened",
+    expected_output="Status of the operation",
 )
 
-task.execute()
+crew = Crew(agents=[crewai_agent], tasks=[task])
+
+crew.kickoff()
 ```
 
 * More detailed list of tools can be found [here](https://app.composio.dev)
