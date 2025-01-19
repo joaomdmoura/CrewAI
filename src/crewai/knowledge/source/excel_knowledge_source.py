@@ -7,22 +7,34 @@ from crewai.knowledge.source.base_file_knowledge_source import BaseFileKnowledge
 class ExcelKnowledgeSource(BaseFileKnowledgeSource):
     """A knowledge source that stores and queries Excel file content using embeddings."""
 
-    def load_content(self) -> Dict[Path, str]:
-        """Load and preprocess Excel file content."""
-        pd = self._import_dependencies()
+    def load_content(self) -> Dict[Path, Dict[str, str]]:
+        """Load and preprocess Excel file content from multiple sheets.
 
+        Each sheet's content is converted to CSV format and stored.
+
+        Returns:
+            Dict[Path, Dict[str, str]]: A mapping of file paths to their respective sheet contents.
+
+        Raises:
+            ImportError: If required dependencies are missing.
+            FileNotFoundError: If the specified Excel file cannot be opened.
+        """
+        pd = self._import_dependencies()
         content_dict = {}
         for file_path in self.safe_file_paths:
-            file_path = self.convert_to_path(file_path)
-            df = pd.read_excel(file_path)
-            content = df.to_csv(index=False)
-            content_dict[file_path] = content
+            with pd.ExcelFile(file_path) as xl:
+                sheet_dict = {
+                    sheet_name: pd.read_excel(xl, sheet_name).to_csv(index=False)
+                    for sheet_name in xl.sheet_names
+                }
+            content_dict[file_path] = sheet_dict
         return content_dict
 
     def _import_dependencies(self):
         """Dynamically import dependencies."""
         try:
-            import openpyxl  # noqa
+            # import openpyxl  # noqa
+            # from openpyxl import load_workbook
             import pandas as pd
 
             return pd
@@ -38,10 +50,14 @@ class ExcelKnowledgeSource(BaseFileKnowledgeSource):
         and save the embeddings.
         """
         # Convert dictionary values to a single string if content is a dictionary
-        if isinstance(self.content, dict):
-            content_str = "\n".join(str(value) for value in self.content.values())
-        else:
-            content_str = str(self.content)
+        # Updated to account for .xlsx workbooks with multiple tabs/sheets
+        content_str = ""
+        for value in self.content.values():
+            if isinstance(value, dict):
+                for sheet_value in value.values():
+                    content_str += str(sheet_value) + "\n"
+            else:
+                content_str += str(value) + "\n"
 
         new_chunks = self._chunk_text(content_str)
         self.chunks.extend(new_chunks)
